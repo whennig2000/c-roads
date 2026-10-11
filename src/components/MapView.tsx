@@ -1,5 +1,4 @@
 import { MapContainer, Marker, Popup, GeoJSON } from 'react-leaflet';
-import { STATIONS } from '../utils/gameData';
 import { useGermanyGeoJSON } from '../utils/useGermanyGeoJSON';
 import type { StationData } from '../utils/gameData';
 import { StationBoard } from './StationBoard';
@@ -23,12 +22,11 @@ L.Marker.prototype.options.icon = DefaultIcon;
 interface MapViewProps {
   currentStation: StationData;
   knownStations?: Record<string, StationData>;
-  targetStationId: string;
   nextHint: string;
   onBoardTrain: (info: TravelInfo) => void;
 }
 
-export function MapView({ currentStation, knownStations, targetStationId, nextHint, onBoardTrain }: MapViewProps) {
+export function MapView({ currentStation, knownStations, nextHint, onBoardTrain }: MapViewProps) {
   const geoJsonData = useGermanyGeoJSON();
   
   return (

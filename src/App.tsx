@@ -135,7 +135,6 @@ function App() {
           <MapView 
             currentStation={state.currentStation}
             knownStations={state.knownStations}
-            targetStationId={state.targetStationId}
             nextHint={currentLevel.nextHint}
             onBoardTrain={startTravel}
           />
