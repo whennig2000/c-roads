@@ -25,7 +25,6 @@ interface StationBoardProps {
 export function StationBoard({ currentStation, targetStationId, onBoardTrain }: StationBoardProps) {
   const [journeys, setJourneys] = useState<Journey[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
 
   const targetStation = Object.values(STATIONS).find(s => s.id === targetStationId)!;
 
@@ -73,7 +72,6 @@ export function StationBoard({ currentStation, targetStationId, onBoardTrain }: 
   }, [currentStation.id, targetStationId]);
 
   if (loading) return <div style={{ padding: '2rem', textAlign: 'center' }}>Lade Verbindungen...</div>;
-  if (error) return <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--accent)' }}>Fehler beim Laden der Verbindungen.</div>;
 
   return (
     <div className="glass-panel" style={{ padding: '2rem', marginTop: '1rem' }}>
