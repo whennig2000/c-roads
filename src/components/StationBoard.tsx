@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Clock, ArrowRight } from 'lucide-react';
+import { Clock, ArrowRight, MapPin } from 'lucide-react';
 import { STATIONS } from '../utils/gameData';
 import type { StationData } from '../utils/gameData';
 import type { TravelInfo } from '../store';
@@ -18,22 +18,25 @@ interface Journey {
 
 interface StationBoardProps {
   currentStation: StationData;
-  targetStationId: string;
   onBoardTrain: (info: TravelInfo) => void;
 }
 
-export function StationBoard({ currentStation, targetStationId, onBoardTrain }: StationBoardProps) {
+export function StationBoard({ currentStation, onBoardTrain }: StationBoardProps) {
+  // Filtere alle anderen Bahnhöfe (außer dem aktuellen) heraus
+  const availableDestinations = Object.values(STATIONS).filter(s => s.id !== currentStation.id);
+  const [selectedDestId, setSelectedDestId] = useState<string>(availableDestinations[0].id);
+  
   const [journeys, setJourneys] = useState<Journey[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const targetStation = Object.values(STATIONS).find(s => s.id === targetStationId)!;
+  const targetStation = STATIONS[Object.keys(STATIONS).find(k => STATIONS[k as keyof typeof STATIONS].id === selectedDestId) as keyof typeof STATIONS];
 
   useEffect(() => {
     const fetchJourneys = async () => {
       try {
         setLoading(true);
         // Using DB Transport REST API to find routes
-        const res = await axios.get(`https://v6.db.transport.rest/journeys?from=${currentStation.id}&to=${targetStationId}&results=5`);
+        const res = await axios.get(\`https://v6.db.transport.rest/journeys?from=\${currentStation.id}&to=\${selectedDestId}&results=5\`);
         setJourneys(res.data.journeys || []);
       } catch (err) {
         console.warn("DB API is down (503). Using fallback connections.", err);
@@ -69,63 +72,93 @@ export function StationBoard({ currentStation, targetStationId, onBoardTrain }: 
       }
     };
     fetchJourneys();
-  }, [currentStation.id, targetStationId]);
-
-  if (loading) return <div style={{ padding: '2rem', textAlign: 'center' }}>Lade Verbindungen...</div>;
+  }, [currentStation.id, selectedDestId, targetStation.name]);
 
   return (
-    <div className="glass-panel" style={{ padding: '2rem', marginTop: '1rem' }}>
-      <h3 style={{ marginBottom: '1.5rem', fontSize: '1.5rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-        <Clock size={24} color="var(--accent)" />
+    <div className="glass-panel" style={{ padding: '2rem', marginTop: '1rem', background: '#fff' }}>
+      <div style={{ marginBottom: '1.5rem' }}>
+        <h3 style={{ fontSize: '1.5rem', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-main)' }}>
+          <MapPin size={24} color="var(--accent)" />
+          Wohin möchtest du reisen?
+        </h3>
+        
+        <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem', flexWrap: 'wrap' }}>
+          {availableDestinations.map(dest => (
+            <button
+              key={dest.id}
+              onClick={() => setSelectedDestId(dest.id)}
+              style={{
+                padding: '0.8rem 1.2rem',
+                borderRadius: '8px',
+                border: \`2px solid \${selectedDestId === dest.id ? 'var(--accent)' : 'var(--glass-border)'}\`,
+                background: selectedDestId === dest.id ? 'rgba(232, 67, 147, 0.1)' : '#f8f9fa',
+                color: selectedDestId === dest.id ? 'var(--accent)' : 'var(--text-muted)',
+                fontWeight: 600,
+                cursor: 'pointer',
+                transition: 'all 0.2s'
+              }}
+            >
+              {dest.name}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <h3 style={{ margin: '2rem 0 1rem 0', fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-muted)' }}>
+        <Clock size={20} />
         Nächste Verbindungen nach {targetStation.name}
       </h3>
       
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        {journeys.length === 0 && <p>Keine Verbindungen gefunden.</p>}
-        {journeys.map((j, i) => {
-          // Find first and last leg to determine overall time
-          const firstLeg = j.legs[0];
-          const lastLeg = j.legs[j.legs.length - 1];
-          const trainName = firstLeg.line?.name || 'Zug';
-          
-          const dep = new Date(firstLeg.departure);
-          const arr = new Date(lastLeg.arrival);
+      {loading ? (
+        <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>Lade Verbindungen...</div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          {journeys.length === 0 && <p style={{ color: 'var(--text-muted)' }}>Keine Verbindungen gefunden.</p>}
+          {journeys.map((j, i) => {
+            const firstLeg = j.legs[0];
+            const lastLeg = j.legs[j.legs.length - 1];
+            const trainName = firstLeg.line?.name || 'Zug';
+            
+            const dep = new Date(firstLeg.departure);
+            const arr = new Date(lastLeg.arrival);
 
-          return (
-            <div key={j.id || i} style={{ 
-              background: 'rgba(0,0,0,0.2)', 
-              borderRadius: '12px', 
-              padding: '1.5rem',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between'
-            }}>
-              <div>
-                <div style={{ fontSize: '1.2rem', fontWeight: 600, color: 'var(--accent)', marginBottom: '0.5rem' }}>
-                  {trainName}
+            return (
+              <div key={j.id || i} style={{ 
+                background: '#f8f9fa', 
+                border: '1px solid var(--glass-border)',
+                borderRadius: '12px', 
+                padding: '1.5rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between'
+              }}>
+                <div>
+                  <div style={{ fontSize: '1.2rem', fontWeight: 600, color: 'var(--accent)', marginBottom: '0.5rem' }}>
+                    {trainName}
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', color: 'var(--text-muted)' }}>
+                    <span>Abfahrt: <strong style={{ color: 'var(--text-main)' }}>{dep.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}</strong></span>
+                    <ArrowRight size={16} />
+                    <span>Ankunft: <strong style={{ color: 'var(--text-main)' }}>{arr.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}</strong></span>
+                  </div>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', color: 'var(--text-muted)' }}>
-                  <span>Abfahrt: <strong style={{ color: 'white' }}>{dep.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}</strong></span>
-                  <ArrowRight size={16} />
-                  <span>Ankunft: <strong style={{ color: 'white' }}>{arr.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}</strong></span>
-                </div>
+                
+                <button 
+                  className="btn"
+                  onClick={() => onBoardTrain({
+                    trainName: trainName,
+                    departureTime: firstLeg.departure,
+                    arrivalTime: lastLeg.arrival,
+                    targetStation: targetStation
+                  })}
+                >
+                  Einsteigen
+                </button>
               </div>
-              
-              <button 
-                className="btn"
-                onClick={() => onBoardTrain({
-                  trainName: trainName,
-                  departureTime: firstLeg.departure,
-                  arrivalTime: lastLeg.arrival,
-                  targetStation: targetStation
-                })}
-              >
-                Einsteigen
-              </button>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

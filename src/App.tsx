@@ -1,10 +1,11 @@
+import { useState } from 'react';
 import { useGameState } from './store';
-import { GAME_LEVELS } from './utils/gameData';
+import { GAME_LEVELS, STATIONS } from './utils/gameData';
 import { Login } from './components/Login';
 import { MapView } from './components/MapView';
 import { TravelView } from './components/TravelView';
 import { LogicalPuzzle } from './components/LogicalPuzzle';
-import { LogOut, Trophy } from 'lucide-react';
+import { LogOut, Trophy, Award, X } from 'lucide-react';
 
 function App() {
   const { 
@@ -16,12 +17,15 @@ function App() {
     startPuzzle, 
     completePuzzle 
   } = useGameState();
+  
+  const [showBadges, setShowBadges] = useState(false);
 
   if (!state.isLoggedIn) {
     return <Login onLogin={login} />;
   }
 
   const currentLevel = GAME_LEVELS[state.levelIndex];
+  const isCorrectStation = currentLevel && state.currentStation.id === currentLevel.targetStation.id;
 
   return (
     <div style={{ position: 'relative', minHeight: '100vh' }}>
@@ -39,18 +43,67 @@ function App() {
         <h1 className="text-gradient" style={{ fontSize: '1.5rem', margin: 0 }}>
           🚂 Reise durch Deutschland
         </h1>
-        <button onClick={logout} style={{ 
-          background: 'transparent', 
-          border: 'none', 
-          color: 'var(--text-muted)', 
-          cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px'
-        }}>
-          <LogOut size={20} /> Abmelden
-        </button>
+        <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
+          <button onClick={() => setShowBadges(true)} style={{ 
+            background: 'transparent', border: 'none', color: 'var(--accent)', cursor: 'pointer',
+            display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600
+          }}>
+            <Award size={20} /> Abzeichen
+          </button>
+          
+          <button onClick={logout} style={{ 
+            background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer',
+            display: 'flex', alignItems: 'center', gap: '8px'
+          }}>
+            <LogOut size={20} /> Abmelden
+          </button>
+        </div>
       </header>
+
+      {/* BADGES MODAL */}
+      {showBadges && (
+        <div className="flex-center animate-fade-in" style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, 
+          background: 'rgba(0,0,0,0.5)', zIndex: 100, padding: '2rem'
+        }}>
+          <div className="glass-panel" style={{ padding: '3rem', maxWidth: '500px', width: '100%', position: 'relative', background: '#fff' }}>
+            <button 
+              onClick={() => setShowBadges(false)}
+              style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: 'none', border: 'none', cursor: 'pointer' }}
+            >
+              <X size={24} color="var(--text-muted)" />
+            </button>
+            <h2 style={{ fontSize: '2rem', marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <Award color="var(--accent)" /> Deine besuchten Bahnhöfe
+            </h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              {Object.values(STATIONS).map(station => {
+                const visited = state.visitedStations?.includes(station.id);
+                return (
+                  <div key={station.id} style={{ 
+                    display: 'flex', alignItems: 'center', gap: '1rem', 
+                    padding: '1rem', borderRadius: '12px',
+                    background: visited ? 'rgba(0, 184, 148, 0.1)' : 'rgba(0,0,0,0.03)',
+                    border: \`1px solid \${visited ? 'var(--success)' : 'var(--glass-border)'}\`
+                  }}>
+                    <div style={{ 
+                      width: '40px', height: '40px', borderRadius: '20px', 
+                      background: visited ? 'var(--success)' : '#ddd',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      color: '#fff'
+                    }}>
+                      {visited ? '✓' : '?'}
+                    </div>
+                    <span style={{ fontSize: '1.2rem', fontWeight: visited ? 600 : 400, color: visited ? 'var(--text-main)' : 'var(--text-muted)' }}>
+                      {station.name}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
 
       <main style={{ paddingTop: '80px' }}>
         {state.phase === 'COMPLETED' && (
@@ -87,8 +140,23 @@ function App() {
           <div className="flex-center animate-fade-in" style={{ minHeight: '80vh' }}>
             <div className="glass-panel" style={{ padding: '3rem', textAlign: 'center' }}>
               <h2 style={{ fontSize: '2rem', marginBottom: '1rem' }}>Ankunft in {state.currentStation.name}!</h2>
-              <p style={{ marginBottom: '2rem', color: 'var(--text-muted)' }}>Du hast den Bahnhof erreicht. Ein neues Rätsel wartet auf dich.</p>
-              <button className="btn" onClick={startPuzzle}>Rätsel starten</button>
+              
+              {isCorrectStation ? (
+                <>
+                  <p style={{ marginBottom: '2rem', color: 'var(--text-muted)' }}>Du hast den richtigen Bahnhof erreicht! Ein neues Rätsel wartet auf dich.</p>
+                  <button className="btn" onClick={startPuzzle}>Rätsel starten</button>
+                </>
+              ) : (
+                <>
+                  <p style={{ marginBottom: '2rem', color: 'var(--text-muted)' }}>
+                    Du hast einen Bahnhof besucht und ein neues Abzeichen gesammelt! <br/>
+                    Aber der Hinweis, den du suchst, ist hier nicht.
+                  </p>
+                  <button className="btn" onClick={() => completePuzzle(state.targetStationId)}>
+                    Weiterreisen
+                  </button>
+                </>
+              )}
             </div>
           </div>
         )}

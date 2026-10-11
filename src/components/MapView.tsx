@@ -45,8 +45,7 @@ export function MapView({ currentStation, targetStationId, nextHint, onBoardTrai
         {/* MAP */}
         <div style={{ height: '500px', width: '100%', borderRadius: '20px', overflow: 'hidden', border: '1px solid var(--glass-border)', background: '#f8f9fa' }}>
           <MapContainer 
-            center={[51.1657, 10.4515]} // Mitte von Deutschland
-            zoom={5.5} 
+            bounds={[[47.27, 5.86], [55.05, 15.04]]}
             style={{ height: '100%', width: '100%', background: '#e1f5fe' }} // Light blue for water background
             zoomControl={false}
             dragging={false}
@@ -84,7 +83,6 @@ export function MapView({ currentStation, targetStationId, nextHint, onBoardTrai
         <div style={{ display: 'flex', flexDirection: 'column' }}>
           <StationBoard 
             currentStation={currentStation} 
-            targetStationId={targetStationId} 
             onBoardTrain={onBoardTrain} 
           />
         </div>

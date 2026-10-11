@@ -18,6 +18,7 @@ interface GameState {
   levelIndex: number;
   phase: GamePhase;
   travelInfo: TravelInfo | null;
+  visitedStations: string[];
 }
 
 const STORAGE_KEY = 'shogito_train_game_state';
@@ -29,6 +30,7 @@ const defaultState: GameState = {
   levelIndex: 0,
   phase: 'MAP',
   travelInfo: null,
+  visitedStations: [START_STATION.id],
 };
 
 export function useGameState() {
@@ -65,12 +67,20 @@ export function useGameState() {
   };
 
   const arrive = () => {
-    setState(s => ({
-      ...s,
-      phase: 'ARRIVED',
-      currentStation: s.travelInfo!.targetStation,
-      travelInfo: null
-    }));
+    setState(s => {
+      if (!s.travelInfo) return s;
+      const target = s.travelInfo.targetStation;
+      const newVisited = s.visitedStations.includes(target.id) 
+        ? s.visitedStations 
+        : [...s.visitedStations, target.id];
+      return {
+        ...s,
+        phase: 'ARRIVED',
+        currentStation: target,
+        travelInfo: null,
+        visitedStations: newVisited,
+      };
+    });
   };
 
   const startPuzzle = () => {

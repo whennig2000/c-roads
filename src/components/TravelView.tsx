@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
-import { Clock, Ticket } from 'lucide-react';
+import { Clock, Armchair, Navigation } from 'lucide-react';
 import type { TravelInfo } from '../store';
 import type { StationData } from '../utils/gameData';
 import { MapContainer, Marker, Popup, Polyline, GeoJSON } from 'react-leaflet';
@@ -48,6 +48,15 @@ export function TravelView({ info, currentStation, onArrive }: TravelViewProps) 
   const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
   const seconds = Math.floor((diffMs % (1000 * 60)) / 1000);
 
+  // Moving dot progress (0.0 to 1.0)
+  const totalDuration = arrivalTime.getTime() - departureTime.getTime();
+  const elapsed = now.getTime() - departureTime.getTime();
+  const progress = isWaiting ? 0 : isArrived ? 1 : Math.max(0, Math.min(1, elapsed / totalDuration));
+  
+  const currentLat = currentStation.coords[0] + (info.targetStation.coords[0] - currentStation.coords[0]) * progress;
+  const currentLng = currentStation.coords[1] + (info.targetStation.coords[1] - currentStation.coords[1]) * progress;
+  const currentPos: [number, number] = [currentLat, currentLng];
+
   // Das Bild für das "Fenster" (beim Warten die aktuelle Stadt, während der Fahrt Landschaft)
   const windowImageSrc = import.meta.env.BASE_URL + "images/" + (isWaiting ? getCityImageName(currentStation.name) : "landscape.jpg");
 
@@ -57,8 +66,7 @@ export function TravelView({ info, currentStation, onArrive }: TravelViewProps) 
       {/* SIMPLE MAP */}
       <div className="glass-panel animate-fade-in" style={{ height: '350px', width: '100%', overflow: 'hidden', padding: '0', background: '#f8f9fa' }}>
         <MapContainer 
-          center={[51.1657, 10.4515]} // Mitte von Deutschland
-          zoom={5.5} 
+          bounds={[[47.27, 5.86], [55.05, 15.04]]}
           style={{ height: '100%', width: '100%', background: '#e1f5fe' }} // Light blue for water background
           zoomControl={false}
           dragging={false}
@@ -87,8 +95,14 @@ export function TravelView({ info, currentStation, onArrive }: TravelViewProps) 
 
           <Polyline 
             positions={[currentStation.coords, info.targetStation.coords]} 
-            pathOptions={{ color: 'var(--accent)', weight: 4, dashArray: '10, 10' }} 
+            pathOptions={{ color: 'var(--text-muted)', weight: 3, dashArray: '5, 10' }} 
           />
+
+          {!isWaiting && (
+            <Marker position={currentPos}>
+              <Popup>Aktueller Standort</Popup>
+            </Marker>
+          )}
         </MapContainer>
       </div>
 
@@ -107,11 +121,10 @@ export function TravelView({ info, currentStation, onArrive }: TravelViewProps) 
             </div>
             {!isWaiting && (
               <div style={{ background: 'rgba(232, 67, 147, 0.1)', padding: '0.8rem 1.2rem', borderRadius: '12px', border: '1px solid var(--accent)', color: 'var(--accent)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                  <Ticket size={20} />
-                  <span style={{ fontWeight: 600, fontSize: '0.9rem', textTransform: 'uppercase' }}>Ticket</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}>
+                  <Armchair size={24} />
+                  <div style={{ fontSize: '1.2rem', fontWeight: 700 }}>{seatNumber}</div>
                 </div>
-                <div style={{ fontSize: '1.1rem', fontWeight: 700 }}>{seatNumber}</div>
               </div>
             )}
           </div>
