@@ -78,6 +78,7 @@ function App() {
         {state.phase === 'TRAVELING' && state.travelInfo && (
           <TravelView 
             info={state.travelInfo}
+            currentStation={state.currentStation}
             onArrive={arrive}
           />
         )}
