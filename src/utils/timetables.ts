@@ -145,7 +145,6 @@ export function generateLocalFallbackJourneys(fromId: string, toId: string) {
   for (const line of ICE_LINES) {
     // Check if path is a subset of the line route (in either direction)
     const lineRoute = line.route;
-    const revRoute = [...line.route].reverse();
     
     // Simple check: does the line contain both start and end?
     if (lineRoute.includes(pathIds[0]) && lineRoute.includes(pathIds[pathIds.length - 1])) {
