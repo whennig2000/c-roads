@@ -44,34 +44,8 @@ export function StationBoard({ currentStation, knownStations, onBoardTrain }: St
         const res = await axios.get(`https://v6.db.transport.rest/journeys?from=${currentStation.id}&to=${selectedDestId}&results=5&stopovers=true`);
         setJourneys(res.data.journeys || []);
       } catch (err) {
-        console.warn("DB API is down (503). Using fallback connections.", err);
-        
-        // Fallback-Verbindungen generieren, damit das Spiel immer spielbar bleibt
-        const now = new Date();
-        const fallbackJourneys: Journey[] = [
-          {
-            id: "fallback-1",
-            legs: [{
-              line: { name: "ICE 101" },
-              origin: { name: currentStation.name },
-              destination: { name: targetStation.name },
-              departure: new Date(now.getTime() + 2 * 60000).toISOString(), // Abfahrt in 2 Min
-              arrival: new Date(now.getTime() + 62 * 60000).toISOString(),  // 1 Std Fahrt
-            }]
-          },
-          {
-            id: "fallback-2",
-            legs: [{
-              line: { name: "RE 42" },
-              origin: { name: currentStation.name },
-              destination: { name: targetStation.name },
-              departure: new Date(now.getTime() + 15 * 60000).toISOString(), // Abfahrt in 15 Min
-              arrival: new Date(now.getTime() + 135 * 60000).toISOString(),  // 2 Std Fahrt
-            }]
-          }
-        ];
-        
-        setJourneys(fallbackJourneys);
+        console.warn("DB API is down (503) or failed.", err);
+        setJourneys([]);
       } finally {
         setLoading(false);
       }

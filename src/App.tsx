@@ -14,6 +14,8 @@ function App() {
     logout, 
     startTravel, 
     arrive, 
+    arriveAt,
+    cancelTravel,
     startPuzzle, 
     completePuzzle,
     resetGame
@@ -145,6 +147,8 @@ function App() {
             info={state.travelInfo}
             currentStation={state.currentStation}
             onArrive={arrive}
+            onArriveAt={arriveAt}
+            onCancel={cancelTravel}
           />
         )}
 

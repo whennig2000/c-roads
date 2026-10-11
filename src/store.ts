@@ -72,10 +72,10 @@ export function useGameState() {
     setState(s => ({ ...s, phase: 'TRAVELING', travelInfo: info }));
   };
 
-  const arrive = () => {
+  const arriveAt = (target: StationData) => {
     setState(s => {
       if (!s.travelInfo) return s;
-      const target = s.travelInfo.targetStation;
+      
       const newVisited = s.visitedStations.includes(target.id) 
         ? s.visitedStations 
         : [...s.visitedStations, target.id];
@@ -87,6 +87,9 @@ export function useGameState() {
           updatedKnownStations[stop.station.id] = stop.station;
         }
       });
+      if (!updatedKnownStations[target.id]) {
+        updatedKnownStations[target.id] = target;
+      }
       
       return {
         ...s,
@@ -97,6 +100,16 @@ export function useGameState() {
         knownStations: updatedKnownStations,
       };
     });
+  };
+
+  const arrive = () => {
+    if (state.travelInfo) {
+      arriveAt(state.travelInfo.targetStation);
+    }
+  };
+
+  const cancelTravel = () => {
+    setState(s => ({ ...s, phase: 'MAP', travelInfo: null }));
   };
 
   const startPuzzle = () => {
@@ -126,6 +139,8 @@ export function useGameState() {
     logout,
     startTravel,
     arrive,
+    arriveAt,
+    cancelTravel,
     startPuzzle,
     completePuzzle,
     resetGame

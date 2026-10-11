@@ -10,6 +10,8 @@ interface TravelViewProps {
   info: TravelInfo;
   currentStation: StationData;
   onArrive: () => void;
+  onArriveAt: (station: StationData) => void;
+  onCancel: () => void;
 }
 
 const getCityImageName = (stationName: string) => {
@@ -20,7 +22,7 @@ const getCityImageName = (stationName: string) => {
   return "landscape.jpg"; // Fallback
 };
 
-export function TravelView({ info, currentStation, onArrive }: TravelViewProps) {
+export function TravelView({ info, currentStation, onArrive, onArriveAt, onCancel }: TravelViewProps) {
   const [now, setNow] = useState(new Date());
   const geoJsonData = useGermanyGeoJSON();
 
@@ -41,6 +43,13 @@ export function TravelView({ info, currentStation, onArrive }: TravelViewProps) 
   const arrivalTime = new Date(info.arrivalTime);
   const isArrived = now >= arrivalTime;
   const isWaiting = now < departureTime;
+  
+  // Auto-Arrive when arrived
+  useEffect(() => {
+    if (isArrived) {
+      onArrive();
+    }
+  }, [isArrived, onArrive]);
   
   const targetTime = isWaiting ? departureTime : arrivalTime;
   const diffMs = Math.max(0, targetTime.getTime() - now.getTime());
@@ -177,14 +186,28 @@ export function TravelView({ info, currentStation, onArrive }: TravelViewProps) 
             </p>
           </div>
 
-          <button 
-            className="btn" 
-            onClick={onArrive} 
-            disabled={!isArrived}
-            style={{ width: '100%', padding: '1.2rem', fontSize: '1.2rem', borderRadius: '16px' }}
-          >
-            {isArrived ? 'Jetzt Aussteigen!' : (isWaiting ? 'Warte auf Abfahrt...' : 'Zug fährt noch...')}
-          </button>
+          {isWaiting ? (
+            <button 
+              className="btn" 
+              onClick={onCancel} 
+              style={{ width: '100%', padding: '1.2rem', fontSize: '1.2rem', borderRadius: '16px', background: 'var(--text-muted)' }}
+            >
+              Abbrechen (Zug verlässt Bahnhof)
+            </button>
+          ) : (
+            <button 
+              className="btn" 
+              onClick={() => {
+                // Find most recent passed stop or upcoming stop to alight
+                const passedStops = info.stopovers?.filter(s => new Date(s.arrival).getTime() <= now.getTime());
+                const stopToAlight = (passedStops && passedStops.length > 0) ? passedStops[passedStops.length - 1].station : currentStation;
+                onArriveAt(stopToAlight);
+              }}
+              style={{ width: '100%', padding: '1.2rem', fontSize: '1.2rem', borderRadius: '16px' }}
+            >
+              Hier aussteigen! (Zwischenhalt)
+            </button>
+          )}
         </div>
       </div>
     </div>
