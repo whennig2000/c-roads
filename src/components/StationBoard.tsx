@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
 import { Clock, ArrowRight, MapPin } from 'lucide-react';
 import { STATIONS } from '../utils/gameData';
 import type { StationData } from '../utils/gameData';
 import type { TravelInfo } from '../store';
-import { generateLocalFallbackJourneys } from '../utils/timetables';
+import { getLocalDepartures } from '../utils/timetables';
 
 interface Journey {
   id: string;
@@ -27,67 +26,30 @@ interface StationBoardProps {
   onBoardTrain: (info: TravelInfo) => void;
 }
 
-export function StationBoard({ currentStation, knownStations, onBoardTrain }: StationBoardProps) {
-  // Filtere alle anderen bekannten Bahnhöfe (außer dem aktuellen) heraus
-  const availableDestinations = Object.values(knownStations || STATIONS).filter(s => s.id !== currentStation.id);
-  const [selectedDestId, setSelectedDestId] = useState<string>(availableDestinations[0]?.id || "");
-  
+export function StationBoard({ currentStation, onBoardTrain }: StationBoardProps) {
   const [journeys, setJourneys] = useState<Journey[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const targetStation = Object.values(knownStations || STATIONS).find(s => s.id === selectedDestId) as StationData;
-
   useEffect(() => {
-    const fetchJourneys = async () => {
-      try {
-        setLoading(true);
-        // Using DB Transport REST API to find routes
-        const res = await axios.get(`https://v6.db.transport.rest/journeys?from=${currentStation.id}&to=${selectedDestId}&results=5&stopovers=true`);
-        setJourneys(res.data.journeys || []);
-      } catch (err) {
-        console.warn("DB API is down (503) oder fehlgeschlagen. Nutze Offline-Ersatzfahrplan.", err);
-        const fallback = generateLocalFallbackJourneys(currentStation.id, targetStation.id);
-        setJourneys(fallback);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchJourneys();
-  }, [currentStation.id, selectedDestId, targetStation.name]);
+    // Generate departures for the current station
+    setLoading(true);
+    setTimeout(() => {
+      const deps = getLocalDepartures(currentStation.id);
+      setJourneys(deps);
+      setLoading(false);
+    }, 500); // slight delay for realism
+  }, [currentStation.id]);
 
   return (
     <div className="glass-panel" style={{ padding: '2rem', marginTop: '1rem', background: '#fff' }}>
-      <div style={{ marginBottom: '1.5rem' }}>
-        <h3 style={{ fontSize: '1.5rem', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-main)' }}>
-          <MapPin size={24} color="var(--accent)" />
-          Wohin möchtest du reisen?
-        </h3>
-        
-        <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem', flexWrap: 'wrap' }}>
-          {availableDestinations.map(dest => (
-            <button
-              key={dest.id}
-              onClick={() => setSelectedDestId(dest.id)}
-              style={{
-                padding: '0.8rem 1.2rem',
-                borderRadius: '8px',
-                border: `2px solid ${selectedDestId === dest.id ? 'var(--accent)' : 'var(--glass-border)'}`,
-                background: selectedDestId === dest.id ? 'rgba(232, 67, 147, 0.1)' : '#f8f9fa',
-                color: selectedDestId === dest.id ? 'var(--accent)' : 'var(--text-muted)',
-                fontWeight: 600,
-                cursor: 'pointer',
-                transition: 'all 0.2s'
-              }}
-            >
-              {dest.name}
-            </button>
-          ))}
-        </div>
-      </div>
+      <h3 style={{ fontSize: '1.5rem', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-main)', marginBottom: '1.5rem' }}>
+        <MapPin size={24} color="var(--accent)" />
+        Abfahrtstafel: {currentStation.name}
+      </h3>
 
       <h3 style={{ margin: '2rem 0 1rem 0', fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-muted)' }}>
         <Clock size={20} />
-        Nächste Verbindungen nach {targetStation.name}
+        Nächste Abfahrten
       </h3>
       
       {loading ? (
@@ -115,7 +77,7 @@ export function StationBoard({ currentStation, knownStations, onBoardTrain }: St
               }}>
                 <div>
                   <div style={{ fontSize: '1.2rem', fontWeight: 600, color: 'var(--accent)', marginBottom: '0.5rem' }}>
-                    {trainName}
+                    {trainName} nach {lastLeg.destination.name}
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', color: 'var(--text-muted)' }}>
                     <span>Abfahrt: <strong style={{ color: 'var(--text-main)' }}>{dep.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}</strong></span>
@@ -136,13 +98,15 @@ export function StationBoard({ currentStation, knownStations, onBoardTrain }: St
                       arrival: s.arrival
                     })).filter(s => s.arrival) || [];
 
-                    onBoardTrain({
-                      trainName: trainName,
-                      departureTime: firstLeg.departure,
-                      arrivalTime: lastLeg.arrival,
-                      targetStation: targetStation,
-                      stopovers: parsedStopovers
-                    });
+                      const targetStationData = Object.values(STATIONS).find(s => s.name === lastLeg.destination.name) || { id: "unknown", name: lastLeg.destination.name, coords: [0,0] as [number, number] };
+                      
+                      onBoardTrain({
+                        trainName: trainName,
+                        departureTime: firstLeg.departure,
+                        arrivalTime: lastLeg.arrival,
+                        targetStation: targetStationData,
+                        stopovers: parsedStopovers
+                      });
                   }}
                 >
                   Einsteigen

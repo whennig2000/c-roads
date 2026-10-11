@@ -102,13 +102,12 @@ export function findPath(startId: string, endId: string): StationData[] | null {
   return null;
 }
 
-export function generateLocalFallbackJourneys(fromId: string, toId: string) {
+export function generateLocalFallbackJourneys(fromId: string, toId: string, delayMinutes: number = 2) {
   const path = findPath(fromId, toId);
   if (!path || path.length < 2) return [];
 
   const now = new Date();
-  // Erster Zug in 2 Minuten
-  const departure = new Date(now.getTime() + 2 * 60000);
+  const departure = new Date(now.getTime() + delayMinutes * 60000);
   let currentTime = departure.getTime();
 
   const stopovers = [];
@@ -164,4 +163,41 @@ export function generateLocalFallbackJourneys(fromId: string, toId: string) {
       stopovers
     }]
   }];
+}
+
+export function getLocalDepartures(stationId: string) {
+  const stationEntry = Object.entries(STATIONS).find(([_, s]) => s.id === stationId);
+  if (!stationEntry) return [];
+  const stationKey = stationEntry[0];
+
+  const journeys: any[] = [];
+  let delay = 2; 
+
+  for (const line of ICE_LINES) {
+    const idx = line.route.indexOf(stationKey);
+    if (idx === -1) continue;
+
+    // Direction 1: towards the end of the array
+    if (idx < line.route.length - 1) {
+      const endStationKey = line.route[line.route.length - 1];
+      const endStationId = STATIONS[endStationKey as keyof typeof STATIONS].id;
+      const j = generateLocalFallbackJourneys(stationId, endStationId, delay);
+      if (j.length > 0) journeys.push(j[0]);
+      delay += 7;
+    }
+
+    // Direction 2: towards the start of the array
+    if (idx > 0) {
+      const endStationKey = line.route[0];
+      const endStationId = STATIONS[endStationKey as keyof typeof STATIONS].id;
+      const j = generateLocalFallbackJourneys(stationId, endStationId, delay);
+      if (j.length > 0) journeys.push(j[0]);
+      delay += 4;
+    }
+  }
+
+  // Sort by departure time
+  journeys.sort((a, b) => new Date(a.legs[0].departure).getTime() - new Date(b.legs[0].departure).getTime());
+  
+  return journeys.slice(0, 5); // Return next 5 trains
 }

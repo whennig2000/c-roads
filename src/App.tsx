@@ -5,7 +5,7 @@ import { Login } from './components/Login';
 import { MapView } from './components/MapView';
 import { TravelView } from './components/TravelView';
 import { LogicalPuzzle } from './components/LogicalPuzzle';
-import { LogOut, Trophy, Award, X, RotateCcw } from 'lucide-react';
+import { LogOut, Trophy, Award, X, RotateCcw, Map } from 'lucide-react';
 
 function App() {
   const { 
@@ -47,12 +47,32 @@ function App() {
           🚂 Reise durch Deutschland
         </h1>
         <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
-          <button onClick={() => setShowBadges(true)} style={{ 
-            background: 'transparent', border: 'none', color: 'var(--accent)', cursor: 'pointer',
-            display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600
-          }}>
-            <Award size={20} /> Abzeichen
-          </button>
+          <div style={{ display: 'flex', gap: '1rem' }}>
+            {state.phase !== 'PUZZLE' && (
+              <button 
+                onClick={() => {
+                  if (state.phase === 'COMPLETED') {
+                    alert('Du hast alle Hinweise gefunden! 🎉');
+                  } else {
+                    alert(`Nächster Hinweis: ${GAME_LEVELS[state.levelIndex]?.nextHint || 'Keine weiteren Hinweise.'}`);
+                  }
+                }}
+                style={{ 
+                  background: 'transparent', border: 'none', color: 'var(--accent)', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600
+                }}
+              >
+                <Map size={20} /> Hinweis
+              </button>
+            )}
+            
+            <button onClick={() => setShowBadges(true)} style={{ 
+              background: 'transparent', border: 'none', color: 'var(--accent)', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600
+            }}>
+              <Award size={20} /> Abzeichen
+            </button>
+          </div>
           
           <button onClick={() => {
             if (window.confirm("Bist du sicher, dass du das Spiel komplett zurücksetzen möchtest? Dein Fortschritt geht verloren und du startest wieder in Frankfurt!")) {
@@ -80,7 +100,7 @@ function App() {
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, 
           background: 'rgba(0,0,0,0.5)', zIndex: 100, padding: '2rem'
         }}>
-          <div className="glass-panel" style={{ padding: '3rem', maxWidth: '500px', width: '100%', position: 'relative', background: '#fff' }}>
+          <div className="glass-panel" style={{ padding: '3rem', maxWidth: '500px', width: '100%', position: 'relative', background: '#fff', maxHeight: '80vh', overflowY: 'auto' }}>
             <button 
               onClick={() => setShowBadges(false)}
               style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: 'none', border: 'none', cursor: 'pointer' }}

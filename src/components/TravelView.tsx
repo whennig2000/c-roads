@@ -45,7 +45,7 @@ const getCityImageName = (stationName: string) => {
   if (stationName.includes("Berlin")) return "berlin.jpg";
   if (stationName.includes("Leipzig")) return "leipzig.jpg";
   if (stationName.includes("München")) return "muenchen.jpg";
-  return "landscape.jpg"; // Fallback
+  return "station.jpg"; // Fallback for stations
 };
 
 export function TravelView({ info, currentStation, onArrive, onArriveAt, onCancel }: TravelViewProps) {
