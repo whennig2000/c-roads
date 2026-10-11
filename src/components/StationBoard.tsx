@@ -44,27 +44,8 @@ export function StationBoard({ currentStation, knownStations, onBoardTrain }: St
         const res = await axios.get(`https://v6.db.transport.rest/journeys?from=${currentStation.id}&to=${selectedDestId}&results=5&stopovers=true`);
         setJourneys(res.data.journeys || []);
       } catch (err) {
-        console.warn("DB API is down (503) or failed. Using realistic mock data.", err);
-        const now = new Date();
-        const fakeStopoverTime = new Date(now.getTime() + 1.5 * 60000);
-        const fakeArrivalTime = new Date(now.getTime() + 3 * 60000);
-        
-        setJourneys([{
-          id: "mock-1",
-          legs: [{
-            line: { name: "ICE Notfallzug" },
-            origin: { name: currentStation.name },
-            destination: { name: targetStation.name },
-            departure: new Date(now.getTime() + 0.5 * 60000).toISOString(),
-            arrival: fakeArrivalTime.toISOString(),
-            stopovers: [
-              {
-                stop: { id: "mock-stop", name: "Zwischenhalt Stadt", location: { latitude: 51.0, longitude: 10.0 } },
-                arrival: fakeStopoverTime.toISOString()
-              }
-            ]
-          }]
-        }]);
+        console.warn("DB API is down (503) or failed.", err);
+        setJourneys([]);
       } finally {
         setLoading(false);
       }

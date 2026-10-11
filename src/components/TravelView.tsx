@@ -72,8 +72,12 @@ export function TravelView({ info, currentStation, onArrive, onArriveAt, onCance
     return Math.abs(now.getTime() - stopTime) < 60000 * 1.5; // 1.5 minutes window
   });
 
-  // Das Bild für das "Fenster" (beim Warten die aktuelle Stadt, während der Fahrt Landschaft)
-  const windowImageSrc = import.meta.env.BASE_URL + "images/" + (isWaiting ? getCityImageName(currentStation.name) : "landscape.jpg");
+  // Das Bild für das "Fenster" (beim Warten die aktuelle Stadt, während der Fahrt Landschaft, beim Halt die Halt-Stadt)
+  const windowImageSrc = import.meta.env.BASE_URL + "images/" + (
+    isWaiting ? getCityImageName(currentStation.name) : 
+    currentStop ? getCityImageName(currentStop.station.name) : 
+    "landscape.jpg"
+  );
 
   return (
     <div className="container" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
@@ -198,7 +202,7 @@ export function TravelView({ info, currentStation, onArrive, onArriveAt, onCance
               onClick={onCancel} 
               style={{ width: '100%', padding: '1.2rem', fontSize: '1.2rem', borderRadius: '16px', background: 'var(--text-muted)' }}
             >
-              Warten abbrechen
+              Aussteigen
             </button>
           ) : (
             <button 
