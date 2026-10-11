@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { Clock, Armchair } from 'lucide-react';
 import type { TravelInfo } from '../store';
 import type { StationData } from '../utils/gameData';
-import { MapContainer, Marker, Popup, Polyline, GeoJSON } from 'react-leaflet';
+import { MapContainer, Marker, Popup, GeoJSON } from 'react-leaflet';
 import { useGermanyGeoJSON } from '../utils/useGermanyGeoJSON';
 import 'leaflet/dist/leaflet.css';
 

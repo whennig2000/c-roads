@@ -1,4 +1,4 @@
-import { MapContainer, Marker, Popup, Polyline, GeoJSON } from 'react-leaflet';
+import { MapContainer, Marker, Popup, GeoJSON } from 'react-leaflet';
 import { STATIONS } from '../utils/gameData';
 import { useGermanyGeoJSON } from '../utils/useGermanyGeoJSON';
 import type { StationData } from '../utils/gameData';
@@ -29,7 +29,6 @@ interface MapViewProps {
 }
 
 export function MapView({ currentStation, knownStations, targetStationId, nextHint, onBoardTrain }: MapViewProps) {
-  const targetStation = Object.values(STATIONS).find(s => s.id === targetStationId)!;
   const geoJsonData = useGermanyGeoJSON();
   
   return (

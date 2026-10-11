@@ -34,7 +34,7 @@ export function StationBoard({ currentStation, knownStations, onBoardTrain }: St
   const [journeys, setJourneys] = useState<Journey[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const targetStation = (knownStations || STATIONS)[Object.keys(knownStations || STATIONS).find(k => (knownStations || STATIONS)[k].id === selectedDestId) as string] || Object.values(knownStations || STATIONS).find(s => s.id === selectedDestId);
+  const targetStation = Object.values(knownStations || STATIONS).find(s => s.id === selectedDestId) as StationData;
 
   useEffect(() => {
     const fetchJourneys = async () => {
