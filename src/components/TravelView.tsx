@@ -66,6 +66,12 @@ export function TravelView({ info, currentStation, onArrive, onArriveAt, onCance
   const currentLng = currentStation.coords[1] + (info.targetStation.coords[1] - currentStation.coords[1]) * progress;
   const currentPos: [number, number] = [currentLat, currentLng];
 
+  // Check if we are currently stopped at an intermediate station (within 1.5 min of arrival)
+  const currentStop = info.stopovers?.find(s => {
+    const stopTime = new Date(s.arrival).getTime();
+    return Math.abs(now.getTime() - stopTime) < 60000 * 1.5; // 1.5 minutes window
+  });
+
   // Das Bild für das "Fenster" (beim Warten die aktuelle Stadt, während der Fahrt Landschaft)
   const windowImageSrc = import.meta.env.BASE_URL + "images/" + (isWaiting ? getCityImageName(currentStation.name) : "landscape.jpg");
 
@@ -192,20 +198,27 @@ export function TravelView({ info, currentStation, onArrive, onArriveAt, onCance
               onClick={onCancel} 
               style={{ width: '100%', padding: '1.2rem', fontSize: '1.2rem', borderRadius: '16px', background: 'var(--text-muted)' }}
             >
-              Abbrechen (Zug verlässt Bahnhof)
+              Warten abbrechen
             </button>
           ) : (
             <button 
               className="btn" 
               onClick={() => {
-                // Find most recent passed stop or upcoming stop to alight
-                const passedStops = info.stopovers?.filter(s => new Date(s.arrival).getTime() <= now.getTime());
-                const stopToAlight = (passedStops && passedStops.length > 0) ? passedStops[passedStops.length - 1].station : currentStation;
-                onArriveAt(stopToAlight);
+                if (currentStop) {
+                  onArriveAt(currentStop.station);
+                }
               }}
-              style={{ width: '100%', padding: '1.2rem', fontSize: '1.2rem', borderRadius: '16px' }}
+              disabled={!currentStop}
+              style={{ 
+                width: '100%', 
+                padding: '1.2rem', 
+                fontSize: '1.2rem', 
+                borderRadius: '16px',
+                opacity: currentStop ? 1 : 0.5,
+                background: currentStop ? 'var(--accent)' : 'var(--text-muted)'
+              }}
             >
-              Hier aussteigen! (Zwischenhalt)
+              {currentStop ? `Hier aussteigen! (${currentStop.station.name})` : 'Türen sind geschlossen (Fahrt)'}
             </button>
           )}
         </div>
