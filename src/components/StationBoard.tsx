@@ -4,6 +4,7 @@ import { Clock, ArrowRight, MapPin } from 'lucide-react';
 import { STATIONS } from '../utils/gameData';
 import type { StationData } from '../utils/gameData';
 import type { TravelInfo } from '../store';
+import { generateLocalFallbackJourneys } from '../utils/timetables';
 
 interface Journey {
   id: string;
@@ -44,8 +45,9 @@ export function StationBoard({ currentStation, knownStations, onBoardTrain }: St
         const res = await axios.get(`https://v6.db.transport.rest/journeys?from=${currentStation.id}&to=${selectedDestId}&results=5&stopovers=true`);
         setJourneys(res.data.journeys || []);
       } catch (err) {
-        console.warn("DB API is down (503) or failed.", err);
-        setJourneys([]);
+        console.warn("DB API is down (503) oder fehlgeschlagen. Nutze Offline-Ersatzfahrplan.", err);
+        const fallback = generateLocalFallbackJourneys(currentStation.id, targetStation.id);
+        setJourneys(fallback);
       } finally {
         setLoading(false);
       }
