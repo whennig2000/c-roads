@@ -1,5 +1,6 @@
-import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
+import { MapContainer, Marker, Popup, Polyline, GeoJSON } from 'react-leaflet';
 import { STATIONS } from '../utils/gameData';
+import { useGermanyGeoJSON } from '../utils/useGermanyGeoJSON';
 import type { StationData } from '../utils/gameData';
 import { StationBoard } from './StationBoard';
 import type { TravelInfo } from '../store';
@@ -28,6 +29,7 @@ interface MapViewProps {
 
 export function MapView({ currentStation, targetStationId, nextHint, onBoardTrain }: MapViewProps) {
   const targetStation = Object.values(STATIONS).find(s => s.id === targetStationId)!;
+  const geoJsonData = useGermanyGeoJSON();
   
   return (
     <div className="container animate-fade-in">
@@ -41,18 +43,27 @@ export function MapView({ currentStation, targetStationId, nextHint, onBoardTrai
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
         {/* MAP */}
-        <div style={{ height: '500px', width: '100%', borderRadius: '20px', overflow: 'hidden', border: '1px solid var(--glass-border)' }}>
+        <div style={{ height: '500px', width: '100%', borderRadius: '20px', overflow: 'hidden', border: '1px solid var(--glass-border)', background: '#f8f9fa' }}>
           <MapContainer 
-            center={currentStation.coords} 
-            zoom={6} 
-            style={{ height: '100%', width: '100%' }}
+            center={[51.1657, 10.4515]} // Mitte von Deutschland
+            zoom={5.5} 
+            style={{ height: '100%', width: '100%', background: '#e1f5fe' }} // Light blue for water background
             zoomControl={false}
+            dragging={false}
+            scrollWheelZoom={false}
           >
-            <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              className="map-tiles"
-            />
+            {geoJsonData && (
+              <GeoJSON 
+                data={geoJsonData} 
+                style={{
+                  fillColor: '#ffffff',
+                  weight: 2,
+                  opacity: 1,
+                  color: '#b0bec5',
+                  fillOpacity: 1
+                }}
+              />
+            )}
             
             <Marker position={currentStation.coords}>
               <Popup>Aktueller Standort: {currentStation.name}</Popup>
