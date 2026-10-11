@@ -13,30 +13,35 @@ interface Journey {
     destination: { name: string };
     departure: string;
     arrival: string;
+    stopovers?: {
+      stop: { id: string; name: string; location?: { latitude: number; longitude: number } };
+      arrival: string;
+    }[];
   }[];
 }
 
 interface StationBoardProps {
   currentStation: StationData;
+  knownStations?: Record<string, StationData>;
   onBoardTrain: (info: TravelInfo) => void;
 }
 
-export function StationBoard({ currentStation, onBoardTrain }: StationBoardProps) {
-  // Filtere alle anderen Bahnhöfe (außer dem aktuellen) heraus
-  const availableDestinations = Object.values(STATIONS).filter(s => s.id !== currentStation.id);
-  const [selectedDestId, setSelectedDestId] = useState<string>(availableDestinations[0].id);
+export function StationBoard({ currentStation, knownStations, onBoardTrain }: StationBoardProps) {
+  // Filtere alle anderen bekannten Bahnhöfe (außer dem aktuellen) heraus
+  const availableDestinations = Object.values(knownStations || STATIONS).filter(s => s.id !== currentStation.id);
+  const [selectedDestId, setSelectedDestId] = useState<string>(availableDestinations[0]?.id || "");
   
   const [journeys, setJourneys] = useState<Journey[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const targetStation = STATIONS[Object.keys(STATIONS).find(k => STATIONS[k as keyof typeof STATIONS].id === selectedDestId) as keyof typeof STATIONS];
+  const targetStation = (knownStations || STATIONS)[Object.keys(knownStations || STATIONS).find(k => (knownStations || STATIONS)[k].id === selectedDestId) as string] || Object.values(knownStations || STATIONS).find(s => s.id === selectedDestId);
 
   useEffect(() => {
     const fetchJourneys = async () => {
       try {
         setLoading(true);
         // Using DB Transport REST API to find routes
-        const res = await axios.get(`https://v6.db.transport.rest/journeys?from=${currentStation.id}&to=${selectedDestId}&results=5`);
+        const res = await axios.get(`https://v6.db.transport.rest/journeys?from=${currentStation.id}&to=${selectedDestId}&results=5&stopovers=true`);
         setJourneys(res.data.journeys || []);
       } catch (err) {
         console.warn("DB API is down (503). Using fallback connections.", err);
@@ -145,12 +150,24 @@ export function StationBoard({ currentStation, onBoardTrain }: StationBoardProps
                 
                 <button 
                   className="btn"
-                  onClick={() => onBoardTrain({
-                    trainName: trainName,
-                    departureTime: firstLeg.departure,
-                    arrivalTime: lastLeg.arrival,
-                    targetStation: targetStation
-                  })}
+                  onClick={() => {
+                    const parsedStopovers = firstLeg.stopovers?.map(s => ({
+                      station: { 
+                        id: s.stop.id, 
+                        name: s.stop.name, 
+                        coords: s.stop.location ? [s.stop.location.latitude, s.stop.location.longitude] as [number, number] : [0,0] as [number, number] 
+                      },
+                      arrival: s.arrival
+                    })).filter(s => s.arrival) || [];
+
+                    onBoardTrain({
+                      trainName: trainName,
+                      departureTime: firstLeg.departure,
+                      arrivalTime: lastLeg.arrival,
+                      targetStation: targetStation,
+                      stopovers: parsedStopovers
+                    });
+                  }}
                 >
                   Einsteigen
                 </button>

@@ -5,7 +5,7 @@ import { Login } from './components/Login';
 import { MapView } from './components/MapView';
 import { TravelView } from './components/TravelView';
 import { LogicalPuzzle } from './components/LogicalPuzzle';
-import { LogOut, Trophy, Award, X } from 'lucide-react';
+import { LogOut, Trophy, Award, X, RotateCcw } from 'lucide-react';
 
 function App() {
   const { 
@@ -15,7 +15,8 @@ function App() {
     startTravel, 
     arrive, 
     startPuzzle, 
-    completePuzzle 
+    completePuzzle,
+    resetGame
   } = useGameState();
   
   const [showBadges, setShowBadges] = useState(false);
@@ -51,6 +52,17 @@ function App() {
             <Award size={20} /> Abzeichen
           </button>
           
+          <button onClick={() => {
+            if (window.confirm("Bist du sicher, dass du das Spiel komplett zurücksetzen möchtest? Dein Fortschritt geht verloren und du startest wieder in Frankfurt!")) {
+              resetGame();
+            }
+          }} style={{ 
+            background: 'transparent', border: 'none', color: 'var(--accent)', cursor: 'pointer',
+            display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600
+          }}>
+            <RotateCcw size={20} /> Reset
+          </button>
+          
           <button onClick={logout} style={{ 
             background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer',
             display: 'flex', alignItems: 'center', gap: '8px'
@@ -77,7 +89,7 @@ function App() {
               <Award color="var(--accent)" /> Deine besuchten Bahnhöfe
             </h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              {Object.values(STATIONS).map(station => {
+              {Object.values(state.knownStations || STATIONS).map(station => {
                 const visited = state.visitedStations?.includes(station.id);
                 return (
                   <div key={station.id} style={{ 
@@ -122,6 +134,7 @@ function App() {
         {state.phase === 'MAP' && currentLevel && (
           <MapView 
             currentStation={state.currentStation}
+            knownStations={state.knownStations}
             targetStationId={state.targetStationId}
             nextHint={currentLevel.nextHint}
             onBoardTrain={startTravel}

@@ -22,12 +22,13 @@ L.Marker.prototype.options.icon = DefaultIcon;
 
 interface MapViewProps {
   currentStation: StationData;
+  knownStations?: Record<string, StationData>;
   targetStationId: string;
   nextHint: string;
   onBoardTrain: (info: TravelInfo) => void;
 }
 
-export function MapView({ currentStation, targetStationId, nextHint, onBoardTrain }: MapViewProps) {
+export function MapView({ currentStation, knownStations, targetStationId, nextHint, onBoardTrain }: MapViewProps) {
   const targetStation = Object.values(STATIONS).find(s => s.id === targetStationId)!;
   const geoJsonData = useGermanyGeoJSON();
   
@@ -67,15 +68,6 @@ export function MapView({ currentStation, targetStationId, nextHint, onBoardTrai
             <Marker position={currentStation.coords}>
               <Popup>Aktueller Standort: {currentStation.name}</Popup>
             </Marker>
-            
-            <Marker position={targetStation.coords}>
-              <Popup>Ziel: {targetStation.name}</Popup>
-            </Marker>
-
-            <Polyline 
-              positions={[currentStation.coords, targetStation.coords]} 
-              pathOptions={{ color: 'var(--accent)', weight: 4, dashArray: '10, 10' }} 
-            />
           </MapContainer>
         </div>
 
@@ -83,6 +75,7 @@ export function MapView({ currentStation, targetStationId, nextHint, onBoardTrai
         <div style={{ display: 'flex', flexDirection: 'column' }}>
           <StationBoard 
             currentStation={currentStation} 
+            knownStations={knownStations}
             onBoardTrain={onBoardTrain} 
           />
         </div>

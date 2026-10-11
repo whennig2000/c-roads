@@ -31,6 +31,7 @@ export const STATIONS = {
   berlin: { id: "8011160", name: "Berlin Hbf", coords: [52.5251, 13.3694] as [number, number] },
   leipzig: { id: "8010195", name: "Leipzig Hbf", coords: [51.3465, 12.3821] as [number, number] },
   muenchen: { id: "8000261", name: "München Hbf", coords: [48.1402, 11.5583] as [number, number] },
+  frankfurt: { id: "8000105", name: "Frankfurt (Main) Hbf", coords: [50.1071, 8.6633] as [number, number] },
 };
 
 export const GAME_LEVELS: LevelData[] = [
@@ -78,4 +79,4 @@ export const GAME_LEVELS: LevelData[] = [
   }
 ];
 
-export const START_STATION = STATIONS.hamburg;
+export const START_STATION = STATIONS.frankfurt;

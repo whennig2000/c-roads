@@ -85,24 +85,11 @@ export function TravelView({ info, currentStation, onArrive }: TravelViewProps) 
             />
           )}
           
-          <Marker position={currentStation.coords}>
-            <Popup>Start: {currentStation.name}</Popup>
-          </Marker>
-          
-          <Marker position={info.targetStation.coords}>
-            <Popup>Ziel: {info.targetStation.name}</Popup>
+          <Marker position={currentPos}>
+            <Popup>Aktueller Standort</Popup>
           </Marker>
 
-          <Polyline 
-            positions={[currentStation.coords, info.targetStation.coords]} 
-            pathOptions={{ color: 'var(--text-muted)', weight: 3, dashArray: '5, 10' }} 
-          />
 
-          {!isWaiting && (
-            <Marker position={currentPos}>
-              <Popup>Aktueller Standort</Popup>
-            </Marker>
-          )}
         </MapContainer>
       </div>
 
@@ -122,6 +109,9 @@ export function TravelView({ info, currentStation, onArrive }: TravelViewProps) 
             {!isWaiting && (
               <div style={{ background: 'rgba(232, 67, 147, 0.1)', padding: '0.8rem 1.2rem', borderRadius: '12px', border: '1px solid var(--accent)', color: 'var(--accent)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}>
+                  <span style={{ fontSize: '1rem', fontWeight: 600 }}>{info.trainName}</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center', marginTop: '4px' }}>
                   <Armchair size={24} />
                   <div style={{ fontSize: '1.2rem', fontWeight: 700 }}>{seatNumber}</div>
                 </div>
@@ -153,6 +143,21 @@ export function TravelView({ info, currentStation, onArrive }: TravelViewProps) 
               style={{ width: '100%', height: '100%', objectFit: 'cover' }}
             />
           </div>
+
+          {/* NEXT STOPS */}
+          {!isWaiting && info.stopovers && info.stopovers.length > 0 && (
+            <div style={{ background: 'rgba(0,0,0,0.03)', padding: '1.5rem', borderRadius: '16px', marginBottom: '2rem', textAlign: 'left' }}>
+              <h4 style={{ color: 'var(--accent)', marginBottom: '1rem' }}>Nächste Halte</h4>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                {info.stopovers.filter(s => new Date(s.arrival).getTime() > now.getTime()).slice(0, 3).map((stop, i) => (
+                  <div key={i} style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--glass-border)', paddingBottom: '0.5rem' }}>
+                    <span style={{ color: 'var(--text-main)' }}>{stop.station.name}</span>
+                    <span style={{ color: 'var(--text-muted)' }}>{new Date(stop.arrival).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div style={{ background: 'rgba(0,0,0,0.03)', padding: '2rem', borderRadius: '16px', marginBottom: '2rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem', color: 'var(--accent)', marginBottom: '1rem' }}>

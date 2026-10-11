@@ -9,6 +9,10 @@ export interface TravelInfo {
   departureTime: string; // ISO String
   arrivalTime: string; // ISO String
   targetStation: StationData;
+  stopovers: {
+    station: StationData;
+    arrival: string;
+  }[];
 }
 
 interface GameState {
@@ -19,6 +23,7 @@ interface GameState {
   phase: GamePhase;
   travelInfo: TravelInfo | null;
   visitedStations: string[];
+  knownStations: Record<string, StationData>;
 }
 
 const STORAGE_KEY = 'shogito_train_game_state';
@@ -31,6 +36,7 @@ const defaultState: GameState = {
   phase: 'MAP',
   travelInfo: null,
   visitedStations: [START_STATION.id],
+  knownStations: STATIONS,
 };
 
 export function useGameState() {
@@ -73,12 +79,22 @@ export function useGameState() {
       const newVisited = s.visitedStations.includes(target.id) 
         ? s.visitedStations 
         : [...s.visitedStations, target.id];
+        
+      // Neue Zwischenhalte zu bekannten Stationen hinzufügen
+      const updatedKnownStations = { ...s.knownStations };
+      s.travelInfo.stopovers.forEach(stop => {
+        if (!updatedKnownStations[stop.station.id]) {
+          updatedKnownStations[stop.station.id] = stop.station;
+        }
+      });
+      
       return {
         ...s,
         phase: 'ARRIVED',
         currentStation: target,
         travelInfo: null,
         visitedStations: newVisited,
+        knownStations: updatedKnownStations,
       };
     });
   };
