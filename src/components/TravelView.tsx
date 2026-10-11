@@ -4,7 +4,33 @@ import type { TravelInfo } from '../store';
 import type { StationData } from '../utils/gameData';
 import { MapContainer, Marker, Popup, GeoJSON } from 'react-leaflet';
 import { useGermanyGeoJSON } from '../utils/useGermanyGeoJSON';
+import { useWeather } from '../utils/useWeather';
+import type { WeatherData } from '../utils/useWeather';
 import 'leaflet/dist/leaflet.css';
+
+function getWeatherFilter(weather: WeatherData | null) {
+  if (!weather) return 'none';
+  let filters = [];
+  
+  if (!weather.isDay) {
+    filters.push('brightness(0.4)', 'contrast(1.2)', 'sepia(0.3)', 'hue-rotate(200deg)');
+  }
+
+  const code = weather.weatherCode;
+  if (code >= 2 && code <= 3) { // Clouds
+    filters.push('brightness(0.8)', 'contrast(0.9)');
+  } else if (code === 45 || code === 48) { // Fog
+    filters.push('blur(2px)', 'brightness(0.9)', 'contrast(0.7)');
+  } else if (code >= 51 && code <= 67) { // Rain
+    filters.push('grayscale(0.5)', 'brightness(0.7)', 'blur(1px)');
+  } else if (code >= 71 && code <= 77) { // Snow
+    filters.push('brightness(1.2)', 'saturate(0.5)');
+  } else if (code >= 95) { // Thunderstorm
+    filters.push('grayscale(0.8)', 'brightness(0.5)', 'contrast(1.5)');
+  }
+
+  return filters.length > 0 ? filters.join(' ') : 'none';
+}
 
 interface TravelViewProps {
   info: TravelInfo;
@@ -65,6 +91,8 @@ export function TravelView({ info, currentStation, onArrive, onArriveAt, onCance
   const currentLat = currentStation.coords[0] + (info.targetStation.coords[0] - currentStation.coords[0]) * progress;
   const currentLng = currentStation.coords[1] + (info.targetStation.coords[1] - currentStation.coords[1]) * progress;
   const currentPos: [number, number] = [currentLat, currentLng];
+
+  const weather = useWeather(currentPos[0], currentPos[1]);
 
   // Check if we are currently stopped at an intermediate station (within 1.5 min of arrival)
   const currentStop = info.stopovers?.find(s => {
@@ -159,7 +187,13 @@ export function TravelView({ info, currentStation, onArrive, onArriveAt, onCance
             <img 
               src={windowImageSrc} 
               alt="Zugfenster Ausblick" 
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              style={{ 
+                width: '100%', 
+                height: '100%', 
+                objectFit: 'cover',
+                filter: getWeatherFilter(weather),
+                transition: 'filter 2s ease-in-out'
+              }}
             />
           </div>
 

@@ -20,6 +20,34 @@ const EDGES: [keyof typeof STATIONS, keyof typeof STATIONS][] = [
   ['wuerzburg', 'nuernberg'],
   ['nuernberg', 'muenchen'],
   ['stuttgart', 'muenchen'],
+  ['hamburg', 'bremen'],
+  ['bremen', 'dortmund'],
+  ['hannover', 'dortmund'],
+  ['dortmund', 'duesseldorf'],
+  ['duesseldorf', 'koeln'],
+  ['leipzig', 'dresden'],
+  ['berlin', 'dresden'],
+  ['frankfurt', 'mannheim'],
+  ['stuttgart', 'mannheim'],
+  ['karlsruhe', 'mannheim'],
+  ['karlsruhe', 'stuttgart'],
+  ['karlsruhe', 'freiburg'],
+  ['muenchen', 'augsburg'],
+  ['ulm', 'augsburg'],
+  ['ulm', 'stuttgart'],
+  ['nuernberg', 'augsburg'],
+  ['nuernberg', 'regensburg'],
+  ['muenchen', 'regensburg']
+];
+
+const ICE_LINES = [
+  { name: 'ICE 11', route: ['berlin', 'leipzig', 'erfurt', 'frankfurt', 'mannheim', 'stuttgart', 'ulm', 'augsburg', 'muenchen'] },
+  { name: 'ICE 18', route: ['hamburg', 'berlin', 'halle', 'erfurt', 'nuernberg', 'muenchen'] },
+  { name: 'ICE 25', route: ['bremen', 'hannover', 'kassel', 'wuerzburg', 'nuernberg', 'muenchen'] },
+  { name: 'ICE 42', route: ['dortmund', 'duesseldorf', 'koeln', 'frankfurt', 'mannheim', 'stuttgart', 'muenchen'] },
+  { name: 'ICE 50', route: ['dresden', 'leipzig', 'erfurt', 'frankfurt'] },
+  { name: 'ICE 10', route: ['koeln', 'duesseldorf', 'dortmund', 'hannover', 'berlin'] },
+  { name: 'ICE 20', route: ['hamburg', 'hannover', 'kassel', 'frankfurt', 'mannheim', 'karlsruhe', 'freiburg'] },
 ];
 
 // Helper: Distanz in km
@@ -106,10 +134,30 @@ export function generateLocalFallbackJourneys(fromId: string, toId: string) {
 
   const arrival = new Date(currentTime);
 
+  // Find a realistic ICE name
+  const pathIds = path.map(p => {
+    // Find the station key matching the id
+    const entry = Object.entries(STATIONS).find(([_, s]) => s.id === p.id);
+    return entry ? entry[0] : '';
+  });
+
+  let bestIce = "ICE 805 (Ersatz)";
+  for (const line of ICE_LINES) {
+    // Check if path is a subset of the line route (in either direction)
+    const lineRoute = line.route;
+    const revRoute = [...line.route].reverse();
+    
+    // Simple check: does the line contain both start and end?
+    if (lineRoute.includes(pathIds[0]) && lineRoute.includes(pathIds[pathIds.length - 1])) {
+      bestIce = line.name;
+      break;
+    }
+  }
+
   return [{
     id: `local-ice-${Date.now()}`,
     legs: [{
-      line: { name: "ICE 702 (Ersatzfahrplan)" },
+      line: { name: bestIce },
       origin: { name: path[0].name },
       destination: { name: path[path.length - 1].name },
       departure: departure.toISOString(),

@@ -40,6 +40,16 @@ export const STATIONS = {
   erfurt: { id: "8010101", name: "Erfurt Hbf", coords: [50.9725, 11.0383] as [number, number] },
   stuttgart: { id: "8000096", name: "Stuttgart Hbf", coords: [48.7833, 9.1816] as [number, number] },
   koeln: { id: "8000207", name: "Köln Hbf", coords: [50.9432, 6.9587] as [number, number] },
+  bremen: { id: "8000050", name: "Bremen Hbf", coords: [53.0833, 8.8133] as [number, number] },
+  dresden: { id: "8010085", name: "Dresden Hbf", coords: [51.0405, 13.7320] as [number, number] },
+  dortmund: { id: "8000080", name: "Dortmund Hbf", coords: [51.5178, 7.4593] as [number, number] },
+  duesseldorf: { id: "8000085", name: "Düsseldorf Hbf", coords: [51.2204, 6.7944] as [number, number] },
+  mannheim: { id: "8000244", name: "Mannheim Hbf", coords: [49.4797, 8.4699] as [number, number] },
+  karlsruhe: { id: "8000191", name: "Karlsruhe Hbf", coords: [49.0069, 8.4020] as [number, number] },
+  freiburg: { id: "8000107", name: "Freiburg (Breisgau) Hbf", coords: [47.9977, 7.8415] as [number, number] },
+  augsburg: { id: "8000013", name: "Augsburg Hbf", coords: [48.3654, 10.8856] as [number, number] },
+  regensburg: { id: "8000309", name: "Regensburg Hbf", coords: [49.0118, 12.0990] as [number, number] },
+  ulm: { id: "8000170", name: "Ulm Hbf", coords: [48.3982, 9.9822] as [number, number] }
 };
 
 export const GAME_LEVELS: LevelData[] = [
