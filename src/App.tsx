@@ -84,7 +84,7 @@ function App() {
                     display: 'flex', alignItems: 'center', gap: '1rem', 
                     padding: '1rem', borderRadius: '12px',
                     background: visited ? 'rgba(0, 184, 148, 0.1)' : 'rgba(0,0,0,0.03)',
-                    border: \`1px solid \${visited ? 'var(--success)' : 'var(--glass-border)'}\`
+                    border: `1px solid ${visited ? 'var(--success)' : 'var(--glass-border)'}`
                   }}>
                     <div style={{ 
                       width: '40px', height: '40px', borderRadius: '20px', 

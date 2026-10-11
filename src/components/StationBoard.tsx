@@ -36,7 +36,7 @@ export function StationBoard({ currentStation, onBoardTrain }: StationBoardProps
       try {
         setLoading(true);
         // Using DB Transport REST API to find routes
-        const res = await axios.get(\`https://v6.db.transport.rest/journeys?from=\${currentStation.id}&to=\${selectedDestId}&results=5\`);
+        const res = await axios.get(`https://v6.db.transport.rest/journeys?from=${currentStation.id}&to=${selectedDestId}&results=5`);
         setJourneys(res.data.journeys || []);
       } catch (err) {
         console.warn("DB API is down (503). Using fallback connections.", err);
@@ -90,7 +90,7 @@ export function StationBoard({ currentStation, onBoardTrain }: StationBoardProps
               style={{
                 padding: '0.8rem 1.2rem',
                 borderRadius: '8px',
-                border: \`2px solid \${selectedDestId === dest.id ? 'var(--accent)' : 'var(--glass-border)'}\`,
+                border: `2px solid ${selectedDestId === dest.id ? 'var(--accent)' : 'var(--glass-border)'}`,
                 background: selectedDestId === dest.id ? 'rgba(232, 67, 147, 0.1)' : '#f8f9fa',
                 color: selectedDestId === dest.id ? 'var(--accent)' : 'var(--text-muted)',
                 fontWeight: 600,
