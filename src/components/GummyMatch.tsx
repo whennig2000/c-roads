@@ -251,12 +251,12 @@ export function GummyMatch({ onScore }: GummyMatchProps) {
         style={{ 
           display: 'grid', 
           gridTemplateColumns: `repeat(${SIZE}, 1fr)`, 
-          gap: '4px',
+          gap: '2px',
           width: '100%',
-          maxWidth: '500px',
+          maxWidth: '450px',
           margin: '0 auto',
           background: 'rgba(0,0,0,0.05)',
-          padding: '8px',
+          padding: '4px',
           borderRadius: '12px'
         }}
       >
@@ -278,7 +278,7 @@ export function GummyMatch({ onScore }: GummyMatchProps) {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: 'min(8vw, 2rem)',
+              fontSize: 'clamp(1rem, 6vw, 1.8rem)',
               cursor: processing ? 'default' : 'grab',
               opacity: emoji === '' ? 0 : 1,
               transition: 'all 0.2s ease',

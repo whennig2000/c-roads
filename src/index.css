@@ -237,4 +237,8 @@ h1, h2, h3 {
     overflow-x: auto;
     width: 100%;
   }
+
+  .responsive-grid {
+    grid-template-columns: 1fr !important;
+  }
 }

@@ -61,8 +61,7 @@ export function LogicalPuzzle({ data, collectedClues, gridState, onGridChange, o
   return (
     <div>
       <h2 style={{ fontSize: '1.5rem', marginBottom: '1.5rem', color: 'var(--accent)' }}>{data.title}</h2>
-        
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginBottom: '2rem' }}>
+        <div className="responsive-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginBottom: '2rem' }}>
           <div>
             <h3 style={{ marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Gesammelte Hinweise:</h3>
             {collectedClues.length === 0 ? (
@@ -80,9 +79,10 @@ export function LogicalPuzzle({ data, collectedClues, gridState, onGridChange, o
             <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
               Klicke auf die Felder, um sie zu markieren. (1x = X, 2x = O)
             </p>
-            <div style={{ 
-              display: 'grid', 
-              gridTemplateColumns: `auto ${'1fr '.repeat(cat2.items.length)}`,
+            <div className="logical-grid-wrapper">
+              <div style={{ 
+                display: 'grid', 
+                gridTemplateColumns: `auto ${'1fr '.repeat(cat2.items.length)}`,
               gap: '2px',
               background: 'var(--glass-border)',
               padding: '2px',
@@ -113,6 +113,7 @@ export function LogicalPuzzle({ data, collectedClues, gridState, onGridChange, o
                   })}
                 </React.Fragment>
               ))}
+              </div>
             </div>
           </div>
         </div>
