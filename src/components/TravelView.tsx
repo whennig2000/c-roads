@@ -7,6 +7,8 @@ import { useGermanyGeoJSON } from '../utils/useGermanyGeoJSON';
 import { useWeather } from '../utils/useWeather';
 import type { WeatherData } from '../utils/useWeather';
 import 'leaflet/dist/leaflet.css';
+import { GummyMatch } from './GummyMatch';
+import { STATIONS } from '../utils/gameData';
 
 function getWeatherFilter(weather: WeatherData | null) {
   if (!weather) return 'none';
@@ -35,9 +37,11 @@ function getWeatherFilter(weather: WeatherData | null) {
 interface TravelViewProps {
   info: TravelInfo;
   currentStation: StationData;
+  gummyScore: number;
   onArrive: () => void;
   onArriveAt: (station: StationData) => void;
   onCancel: () => void;
+  onAddGummyScore: (points: number) => void;
 }
 
 const getCityImageName = () => {
@@ -46,8 +50,9 @@ const getCityImageName = () => {
   return "station.jpg";
 };
 
-export function TravelView({ info, currentStation, onArrive, onArriveAt, onCancel }: TravelViewProps) {
+export function TravelView({ info, currentStation, gummyScore, onArrive, onArriveAt, onCancel, onAddGummyScore }: TravelViewProps) {
   const [now, setNow] = useState(new Date());
+  const [showTeleporter, setShowTeleporter] = useState(false);
   const geoJsonData = useGermanyGeoJSON();
 
   useEffect(() => {
@@ -256,6 +261,69 @@ export function TravelView({ info, currentStation, onArrive, onArriveAt, onCance
             >
               {currentStop ? `Hier aussteigen! (${currentStop.station.name})` : 'Türen sind geschlossen (Fahrt)'}
             </button>
+          )}
+          {/* GUMMY MATCH & TELEPORTER */}
+          <div style={{ marginTop: '3rem', borderTop: '1px solid var(--glass-border)', paddingTop: '2rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <h3 style={{ margin: 0, color: 'var(--text-main)' }}>Gummibärchen-Punkte: {gummyScore || 0}</h3>
+              {(gummyScore || 0) >= 500 && (
+                <button 
+                  className="btn" 
+                  onClick={() => setShowTeleporter(true)}
+                  style={{ background: '#f1c40f', color: '#000', border: 'none', padding: '0.8rem 1.5rem', borderRadius: '12px', fontWeight: 'bold' }}
+                >
+                  ✨ Teleporter nutzen (500 Pkt.)
+                </button>
+              )}
+            </div>
+            
+            <GummyMatch onScore={onAddGummyScore} />
+          </div>
+
+          {showTeleporter && (
+            <div className="flex-center animate-fade-in" style={{
+              position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, 
+              background: 'rgba(0,0,0,0.8)', zIndex: 100, padding: '2rem'
+            }}>
+              <div className="glass-panel" style={{ padding: '3rem', maxWidth: '400px', width: '100%', background: '#fff', textAlign: 'center' }}>
+                <h2 style={{ marginBottom: '1rem', color: 'var(--accent)' }}>Teleporter aktiviert!</h2>
+                <p style={{ marginBottom: '2rem', color: 'var(--text-muted)' }}>Wähle einen beliebigen Bahnhof, zu dem du sofort reisen möchtest. Das kostet dich 500 Punkte!</p>
+                <select 
+                  id="teleport-select"
+                  style={{ width: '100%', padding: '1rem', borderRadius: '8px', border: '1px solid #ddd', marginBottom: '2rem', fontSize: '1.1rem' }}
+                >
+                  <option value="">-- Bitte wählen --</option>
+                  {Object.values(STATIONS).map(s => (
+                    <option key={s.id} value={s.id}>{s.name}</option>
+                  ))}
+                </select>
+                <div style={{ display: 'flex', gap: '1rem' }}>
+                  <button 
+                    className="btn" 
+                    style={{ flex: 1, background: 'var(--text-muted)' }} 
+                    onClick={() => setShowTeleporter(false)}
+                  >
+                    Abbrechen
+                  </button>
+                  <button 
+                    className="btn" 
+                    style={{ flex: 1, background: '#00b894' }}
+                    onClick={() => {
+                      const sel = document.getElementById('teleport-select') as HTMLSelectElement;
+                      if (!sel.value) return;
+                      const target = Object.values(STATIONS).find(s => s.id === sel.value);
+                      if (target) {
+                        onAddGummyScore(-500);
+                        setShowTeleporter(false);
+                        onArriveAt(target);
+                      }
+                    }}
+                  >
+                    Teleportieren
+                  </button>
+                </div>
+              </div>
+            </div>
           )}
         </div>
       </div>

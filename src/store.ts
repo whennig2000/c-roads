@@ -22,6 +22,7 @@ interface GameState {
   clueIndex: number;
   collectedClues: string[];
   levelIndex: number;
+  gummyScore: number;
   puzzleGrid: Record<string, CellState>;
   phase: GamePhase;
   travelInfo: TravelInfo | null;
@@ -37,6 +38,7 @@ const defaultState: GameState = {
   clueIndex: 0,
   collectedClues: [],
   levelIndex: 0,
+  gummyScore: 0,
   puzzleGrid: {},
   phase: 'MAP',
   travelInfo: null,
@@ -118,6 +120,10 @@ export function useGameState() {
     setState(s => ({ ...s, puzzleGrid: grid }));
   };
 
+  const addGummyScore = (points: number) => {
+    setState(s => ({ ...s, gummyScore: (s.gummyScore || 0) + points }));
+  };
+
   const arrive = () => {
     if (state.travelInfo) {
       arriveAt(state.travelInfo.targetStation);
@@ -160,6 +166,7 @@ export function useGameState() {
     completePuzzle,
     collectClue,
     updatePuzzleGrid,
+    addGummyScore,
     resetGame
   };
 }

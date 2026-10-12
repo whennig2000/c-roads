@@ -20,6 +20,7 @@ function App() {
     completePuzzle,
     collectClue,
     updatePuzzleGrid,
+    addGummyScore,
     resetGame
   } = useGameState();
   
@@ -225,9 +226,11 @@ function App() {
           <TravelView 
             info={state.travelInfo}
             currentStation={state.currentStation}
+            gummyScore={state.gummyScore}
             onArrive={arrive}
             onArriveAt={arriveAt}
             onCancel={cancelTravel}
+            onAddGummyScore={addGummyScore}
           />
         )}
 

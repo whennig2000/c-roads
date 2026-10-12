@@ -102,6 +102,17 @@ export function StationBoard({ currentStation, onBoardTrain }: StationBoardProps
                   <button 
                     className="btn"
                     onClick={() => {
+                      if (dep.getTime() < new Date().getTime()) {
+                        alert("Dieser Zug ist leider schon abgefahren! Die Tafel wird aktualisiert.");
+                        setLoading(true);
+                        setTimeout(() => {
+                          const deps = getLocalDepartures(currentStation.id);
+                          setJourneys(deps);
+                          setLoading(false);
+                        }, 500);
+                        return;
+                      }
+
                       const parsedStopovers = firstLeg.stopovers?.map(s => ({
                         station: { 
                           id: s.stop.id, 
