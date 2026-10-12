@@ -263,22 +263,24 @@ export function TravelView({ info, currentStation, gummyScore, onArrive, onArriv
             </button>
           )}
           {/* GUMMY MATCH & TELEPORTER */}
-          <div style={{ marginTop: '3rem', borderTop: '1px solid var(--glass-border)', paddingTop: '2rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-              <h3 style={{ margin: 0, color: 'var(--text-main)' }}>Gummibärchen-Punkte: {gummyScore || 0}</h3>
-              {(gummyScore || 0) >= 500 && (
-                <button 
-                  className="btn" 
-                  onClick={() => setShowTeleporter(true)}
-                  style={{ background: '#f1c40f', color: '#000', border: 'none', padding: '0.8rem 1.5rem', borderRadius: '12px', fontWeight: 'bold' }}
-                >
-                  ✨ Teleporter nutzen (500 Pkt.)
-                </button>
-              )}
+          {!isWaiting && (
+            <div style={{ marginTop: '3rem', borderTop: '1px solid var(--glass-border)', paddingTop: '2rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                <h3 style={{ margin: 0, color: 'var(--text-main)' }}>Com-Bahn-i Punkte: {gummyScore || 0}</h3>
+                {(gummyScore || 0) >= 50000 && (
+                  <button 
+                    className="btn" 
+                    onClick={() => setShowTeleporter(true)}
+                    style={{ background: '#f1c40f', color: '#000', border: 'none', padding: '0.8rem 1.5rem', borderRadius: '12px', fontWeight: 'bold' }}
+                  >
+                    ✨ Teleporter nutzen (50.000 Pkt.)
+                  </button>
+                )}
+              </div>
+              
+              <GummyMatch onScore={onAddGummyScore} />
             </div>
-            
-            <GummyMatch onScore={onAddGummyScore} />
-          </div>
+          )}
 
           {showTeleporter && (
             <div className="flex-center animate-fade-in" style={{
@@ -287,7 +289,7 @@ export function TravelView({ info, currentStation, gummyScore, onArrive, onArriv
             }}>
               <div className="glass-panel" style={{ padding: '3rem', maxWidth: '400px', width: '100%', background: '#fff', textAlign: 'center' }}>
                 <h2 style={{ marginBottom: '1rem', color: 'var(--accent)' }}>Teleporter aktiviert!</h2>
-                <p style={{ marginBottom: '2rem', color: 'var(--text-muted)' }}>Wähle einen beliebigen Bahnhof, zu dem du sofort reisen möchtest. Das kostet dich 500 Punkte!</p>
+                <p style={{ marginBottom: '2rem', color: 'var(--text-muted)' }}>Wähle einen beliebigen Bahnhof, zu dem du sofort reisen möchtest. Das kostet dich 50.000 Punkte!</p>
                 <select 
                   id="teleport-select"
                   style={{ width: '100%', padding: '1rem', borderRadius: '8px', border: '1px solid #ddd', marginBottom: '2rem', fontSize: '1.1rem' }}
@@ -313,7 +315,7 @@ export function TravelView({ info, currentStation, gummyScore, onArrive, onArriv
                       if (!sel.value) return;
                       const target = Object.values(STATIONS).find(s => s.id === sel.value);
                       if (target) {
-                        onAddGummyScore(-500);
+                        onAddGummyScore(-50000);
                         setShowTeleporter(false);
                         onArriveAt(target);
                       }
