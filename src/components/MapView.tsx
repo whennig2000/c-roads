@@ -22,11 +22,10 @@ L.Marker.prototype.options.icon = DefaultIcon;
 interface MapViewProps {
   currentStation: StationData;
   knownStations?: Record<string, StationData>;
-  nextHint: string;
   onBoardTrain: (info: TravelInfo) => void;
 }
 
-export function MapView({ currentStation, knownStations, nextHint, onBoardTrain }: MapViewProps) {
+export function MapView({ currentStation, knownStations, onBoardTrain }: MapViewProps) {
   const geoJsonData = useGermanyGeoJSON();
   
   return (
@@ -35,7 +34,7 @@ export function MapView({ currentStation, knownStations, nextHint, onBoardTrain 
         <MapPin size={32} color="var(--accent)" />
         <div>
           <h2 style={{ fontSize: '2rem' }}>Du bist in {currentStation.name}</h2>
-          <p style={{ color: 'var(--text-muted)' }}>Hinweis: {nextHint}</p>
+          <p style={{ color: 'var(--text-muted)' }}>Wähle einen Zug auf der Abfahrtstafel, um deine Reise fortzusetzen.</p>
         </div>
       </div>
 

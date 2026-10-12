@@ -21,9 +21,12 @@ export interface StationData {
 }
 
 export interface LevelData {
-  targetStation: StationData;
-  logical: LogicalData;
-  nextHint: string;
+  // Legacy, can be removed but keeping interface just in case
+}
+
+export interface ClueStation {
+  stationId: string;
+  text: string;
 }
 
 export const STATIONS = {
@@ -52,49 +55,26 @@ export const STATIONS = {
   ulm: { id: "8000170", name: "Ulm Hbf", coords: [48.3982, 9.9822] as [number, number] }
 };
 
-export const GAME_LEVELS: LevelData[] = [
-  {
-    targetStation: STATIONS.berlin,
-    logical: {
-      title: "Das erste Rätsel in Berlin",
-      categories: [
-        { category: "Person", items: ["Anna", "Ben", "Carl"] },
-        { category: "Getränk", items: ["Kaffee", "Tee", "Saft"] }
-      ],
-      clues: [
-        { text: "Anna trinkt keinen Kaffee." },
-        { text: "Der Teetrinker heißt nicht Ben." },
-        { text: "Carl trinkt Saft." }
-      ],
-      solution: {
-        "Anna": "Tee",
-        "Ben": "Kaffee",
-        "Carl": "Saft"
-      }
-    },
-    nextHint: "Gut gemacht! Der nächste Hinweis wartet in Leipzig Hbf. Nimm den nächsten Zug dorthin!"
-  },
-  {
-    targetStation: STATIONS.leipzig,
-    logical: {
-      title: "Das Leipziger Musik-Rätsel",
-      categories: [
-        { category: "Instrument", items: ["Klavier", "Geige", "Flöte"] },
-        { category: "Komponist", items: ["Bach", "Mozart", "Beethoven"] }
-      ],
-      clues: [
-        { text: "Das Klavier wird nicht für Bach gespielt." },
-        { text: "Mozart wird auf der Geige gespielt." },
-        { text: "Flöte und Beethoven gehören zusammen." }
-      ],
-      solution: {
-        "Klavier": "Bach", // Wait, clue says not Bach...
-        "Geige": "Mozart",
-        "Flöte": "Beethoven"
-      } // We'll fix logic later, this is just a placeholder!
-    },
-    nextHint: "Hervorragend! Deine finale Station ist München Hbf. Viel Erfolg auf der Reise!"
+export const MASTER_PUZZLE: LogicalData = {
+  title: "Das große Geburtstags-Rätsel",
+  categories: [
+    { category: "Familienmitglied", items: ["Opa", "Onkel", "Cousin", "Tante"] },
+    { category: "Geschenk", items: ["Uhr", "Buch", "Wein", "Pralinen"] }
+  ],
+  clues: [], // Clues are gathered dynamically
+  solution: {
+    "Opa": "Wein",
+    "Onkel": "Uhr",
+    "Cousin": "Buch",
+    "Tante": "Pralinen"
   }
+};
+
+export const CLUE_STATIONS: ClueStation[] = [
+  { stationId: STATIONS.hannover.id, text: "Hinweis 1: Der Opa bekommt weder die Uhr noch das Buch." },
+  { stationId: STATIONS.berlin.id, text: "Hinweis 2: Die Tante freut sich über Süßigkeiten (Pralinen)." },
+  { stationId: STATIONS.leipzig.id, text: "Hinweis 3: Der Cousin liest sehr gerne." },
+  { stationId: STATIONS.muenchen.id, text: "Hinweis 4: Der Onkel bekommt etwas, das die Zeit anzeigt." }
 ];
 
 export const START_STATION = STATIONS.frankfurt;

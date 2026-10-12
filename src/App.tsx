@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useGameState } from './store';
-import { GAME_LEVELS, STATIONS } from './utils/gameData';
+import { MASTER_PUZZLE, CLUE_STATIONS, STATIONS } from './utils/gameData';
 import { Login } from './components/Login';
 import { MapView } from './components/MapView';
 import { TravelView } from './components/TravelView';
@@ -16,8 +16,9 @@ function App() {
     arrive, 
     arriveAt,
     cancelTravel,
-    startPuzzle, 
     completePuzzle,
+    collectClue,
+    updatePuzzleGrid,
     resetGame
   } = useGameState();
   
@@ -28,8 +29,8 @@ function App() {
     return <Login onLogin={login} />;
   }
 
-  const currentLevel = GAME_LEVELS[state.levelIndex];
-  const isCorrectStation = currentLevel && state.currentStation.id === currentLevel.targetStation.id;
+  const currentClueStation = CLUE_STATIONS[state.clueIndex];
+  const targetStation = currentClueStation ? Object.values(STATIONS).find(s => s.id === currentClueStation.stationId) : null;
 
   return (
     <div style={{ position: 'relative', minHeight: '100vh' }}>
@@ -54,8 +55,10 @@ function App() {
                 onClick={() => {
                   if (state.phase === 'COMPLETED') {
                     alert('Du hast alle Hinweise gefunden! 🎉');
+                  } else if (targetStation) {
+                    alert(`Dein aktuelles Reiseziel lautet: Finde den Weg nach ${targetStation.name}!`);
                   } else {
-                    alert(`Dein aktuelles Reiseziel lautet: Finde den Weg nach ${GAME_LEVELS[state.levelIndex]?.targetStation.name || 'unbekannt'}!`);
+                    alert('Du hast alle Hinweise gesammelt! Löse jetzt das finale Rätsel in der Rätselakte.');
                   }
                 }}
                 style={{ 
@@ -148,7 +151,7 @@ function App() {
       )}
 
       {/* PUZZLE MODAL */}
-      {showPuzzleModal && state.phase !== 'COMPLETED' && currentLevel && (
+      {showPuzzleModal && state.phase !== 'COMPLETED' && (
         <div className="flex-center animate-fade-in" style={{
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, 
           background: 'rgba(0,0,0,0.5)', zIndex: 100, padding: '2rem'
@@ -167,11 +170,13 @@ function App() {
               Du kannst jederzeit in diese Akte schauen und dir Notizen machen.
             </p>
             <LogicalPuzzle 
-              data={currentLevel.logical}
+              data={MASTER_PUZZLE}
+              collectedClues={state.collectedClues}
+              gridState={state.puzzleGrid}
+              onGridChange={updatePuzzleGrid}
               onSolve={() => {
                 setShowPuzzleModal(false);
-                const nextLevel = GAME_LEVELS[state.levelIndex + 1];
-                completePuzzle(nextLevel ? nextLevel.targetStation.id : null);
+                completePuzzle();
               }}
             />
           </div>
@@ -192,11 +197,10 @@ function App() {
           </div>
         )}
 
-        {state.phase === 'MAP' && currentLevel && (
+        {state.phase === 'MAP' && (
           <MapView 
             currentStation={state.currentStation}
             knownStations={state.knownStations}
-            nextHint={currentLevel.nextHint}
             onBoardTrain={startTravel}
           />
         )}
@@ -216,10 +220,20 @@ function App() {
             <div className="glass-panel" style={{ padding: '3rem', textAlign: 'center' }}>
               <h2 style={{ fontSize: '2rem', marginBottom: '1rem' }}>Ankunft in {state.currentStation.name}!</h2>
               
-              {isCorrectStation ? (
+              {currentClueStation && state.currentStation.id === currentClueStation.stationId ? (
                 <>
-                  <p style={{ marginBottom: '2rem', color: 'var(--text-muted)' }}>Du hast den richtigen Bahnhof erreicht! Ein neues Rätsel wartet auf dich.</p>
-                  <button className="btn" onClick={startPuzzle}>Rätsel starten</button>
+                  <p style={{ marginBottom: '2rem', color: 'var(--text-muted)' }}>
+                    Du hast einen neuen Hinweis gefunden!
+                  </p>
+                  <div style={{ padding: '1rem', background: 'rgba(0,184,148,0.1)', border: '1px solid var(--success)', borderRadius: '8px', marginBottom: '2rem' }}>
+                    <strong>Hinweis:</strong> {currentClueStation.text}
+                  </div>
+                  <button className="btn" onClick={() => {
+                    collectClue(currentClueStation.text);
+                    cancelTravel();
+                  }}>
+                    Hinweis einsammeln & Weiterreisen
+                  </button>
                 </>
               ) : (
                 <>
@@ -227,23 +241,13 @@ function App() {
                     Du hast einen Bahnhof besucht und ein neues Abzeichen gesammelt! <br/>
                     Aber der Hinweis, den du suchst, ist hier nicht.
                   </p>
-                  <button className="btn" onClick={() => completePuzzle(state.targetStationId)}>
+                  <button className="btn" onClick={cancelTravel}>
                     Weiterreisen
                   </button>
                 </>
               )}
             </div>
           </div>
-        )}
-
-        {state.phase === 'PUZZLE' && currentLevel && (
-          <LogicalPuzzle 
-            data={currentLevel.logical}
-            onSolve={() => {
-              const nextLevel = GAME_LEVELS[state.levelIndex + 1];
-              completePuzzle(nextLevel ? nextLevel.targetStation.id : null);
-            }}
-          />
         )}
       </main>
 

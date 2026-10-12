@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { STATIONS, START_STATION } from './utils/gameData';
 import type { StationData } from './utils/gameData';
+import type { CellState } from './components/LogicalPuzzle';
 
 export type GamePhase = 'MAP' | 'TRAVELING' | 'ARRIVED' | 'PUZZLE' | 'COMPLETED';
 
@@ -18,8 +19,9 @@ export interface TravelInfo {
 interface GameState {
   isLoggedIn: boolean;
   currentStation: StationData;
-  targetStationId: string;
-  levelIndex: number;
+  clueIndex: number;
+  collectedClues: string[];
+  puzzleGrid: Record<string, CellState>;
   phase: GamePhase;
   travelInfo: TravelInfo | null;
   visitedStations: string[];
@@ -31,8 +33,9 @@ const STORAGE_KEY = 'shogito_train_game_state';
 const defaultState: GameState = {
   isLoggedIn: false,
   currentStation: START_STATION,
-  targetStationId: STATIONS.berlin.id,
-  levelIndex: 0,
+  clueIndex: 0,
+  collectedClues: [],
+  puzzleGrid: {},
   phase: 'MAP',
   travelInfo: null,
   visitedStations: [START_STATION.id],
@@ -80,7 +83,6 @@ export function useGameState() {
         ? s.visitedStations 
         : [...s.visitedStations, target.id];
         
-      // Neue Zwischenhalte zu bekannten Stationen hinzufügen
       const updatedKnownStations = { ...s.knownStations };
       s.travelInfo.stopovers.forEach(stop => {
         if (!updatedKnownStations[stop.station.id]) {
@@ -90,7 +92,7 @@ export function useGameState() {
       if (!updatedKnownStations[target.id]) {
         updatedKnownStations[target.id] = target;
       }
-      
+
       return {
         ...s,
         phase: 'ARRIVED',
@@ -100,6 +102,18 @@ export function useGameState() {
         knownStations: updatedKnownStations,
       };
     });
+  };
+
+  const collectClue = (clue: string) => {
+    setState(s => ({
+      ...s,
+      clueIndex: s.clueIndex + 1,
+      collectedClues: [...s.collectedClues, clue]
+    }));
+  };
+
+  const updatePuzzleGrid = (grid: Record<string, CellState>) => {
+    setState(s => ({ ...s, puzzleGrid: grid }));
   };
 
   const arrive = () => {
@@ -112,21 +126,8 @@ export function useGameState() {
     setState(s => ({ ...s, phase: 'MAP', travelInfo: null }));
   };
 
-  const startPuzzle = () => {
-    setState(s => ({ ...s, phase: 'PUZZLE' }));
-  };
-
-  const completePuzzle = (nextTargetId: string | null) => {
-    if (nextTargetId) {
-      setState(s => ({
-        ...s,
-        phase: 'MAP',
-        levelIndex: s.levelIndex + 1,
-        targetStationId: nextTargetId
-      }));
-    } else {
-      setState(s => ({ ...s, phase: 'COMPLETED' }));
-    }
+  const completePuzzle = () => {
+    setState(s => ({ ...s, phase: 'COMPLETED' }));
   };
 
   const resetGame = () => {
@@ -141,8 +142,9 @@ export function useGameState() {
     arrive,
     arriveAt,
     cancelTravel,
-    startPuzzle,
     completePuzzle,
+    collectClue,
+    updatePuzzleGrid,
     resetGame
   };
 }
