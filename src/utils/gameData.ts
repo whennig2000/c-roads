@@ -21,7 +21,8 @@ export interface StationData {
 }
 
 export interface LevelData {
-  // Legacy, can be removed but keeping interface just in case
+  logical: LogicalData;
+  clueStations: ClueStation[];
 }
 
 export interface ClueStation {
@@ -55,26 +56,51 @@ export const STATIONS = {
   ulm: { id: "8000170", name: "Ulm Hbf", coords: [48.3982, 9.9822] as [number, number] }
 };
 
-export const MASTER_PUZZLE: LogicalData = {
-  title: "Das große Geburtstags-Rätsel",
-  categories: [
-    { category: "Familienmitglied", items: ["Opa", "Onkel", "Cousin", "Tante"] },
-    { category: "Geschenk", items: ["Uhr", "Buch", "Wein", "Pralinen"] }
-  ],
-  clues: [], // Clues are gathered dynamically
-  solution: {
-    "Opa": "Wein",
-    "Onkel": "Uhr",
-    "Cousin": "Buch",
-    "Tante": "Pralinen"
+export const GAME_LEVELS: LevelData[] = [
+  {
+    logical: {
+      title: "Das Geburtstags-Geschenk Rätsel",
+      categories: [
+        { category: "Familienmitglied", items: ["Opa", "Onkel", "Cousin", "Tante"] },
+        { category: "Geschenk", items: ["Uhr", "Buch", "Wein", "Pralinen"] }
+      ],
+      clues: [],
+      solution: {
+        "Opa": "Wein",
+        "Onkel": "Uhr",
+        "Cousin": "Buch",
+        "Tante": "Pralinen"
+      }
+    },
+    clueStations: [
+      { stationId: STATIONS.hannover.id, text: "Hinweis 1: Der Opa bekommt weder die Uhr noch das Buch." },
+      { stationId: STATIONS.berlin.id, text: "Hinweis 2: Die Tante freut sich über Süßigkeiten (Pralinen)." },
+      { stationId: STATIONS.leipzig.id, text: "Hinweis 3: Der Cousin liest sehr gerne." },
+      { stationId: STATIONS.muenchen.id, text: "Hinweis 4: Der Onkel bekommt etwas, das die Zeit anzeigt." }
+    ]
+  },
+  {
+    logical: {
+      title: "Das Leipziger Musik-Rätsel",
+      categories: [
+        { category: "Instrument", items: ["Klavier", "Geige", "Flöte", "Cello"] },
+        { category: "Komponist", items: ["Bach", "Mozart", "Beethoven", "Vivaldi"] }
+      ],
+      clues: [],
+      solution: {
+        "Klavier": "Beethoven",
+        "Geige": "Mozart",
+        "Flöte": "Bach",
+        "Cello": "Vivaldi"
+      }
+    },
+    clueStations: [
+      { stationId: STATIONS.stuttgart.id, text: "Hinweis 1: Das Cello spielt Antonio Vivaldi." },
+      { stationId: STATIONS.frankfurt.id, text: "Hinweis 2: Die Zauberflöte stammt nicht von Bach." },
+      { stationId: STATIONS.koeln.id, text: "Hinweis 3: Für Elise wurde auf dem Klavier komponiert (Beethoven)." },
+      { stationId: STATIONS.dortmund.id, text: "Hinweis 4: Mozart liebte Streichinstrumente (Geige)." }
+    ]
   }
-};
-
-export const CLUE_STATIONS: ClueStation[] = [
-  { stationId: STATIONS.hannover.id, text: "Hinweis 1: Der Opa bekommt weder die Uhr noch das Buch." },
-  { stationId: STATIONS.berlin.id, text: "Hinweis 2: Die Tante freut sich über Süßigkeiten (Pralinen)." },
-  { stationId: STATIONS.leipzig.id, text: "Hinweis 3: Der Cousin liest sehr gerne." },
-  { stationId: STATIONS.muenchen.id, text: "Hinweis 4: Der Onkel bekommt etwas, das die Zeit anzeigt." }
 ];
 
 export const START_STATION = STATIONS.frankfurt;

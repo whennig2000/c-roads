@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { STATIONS, START_STATION } from './utils/gameData';
+import { STATIONS, START_STATION, GAME_LEVELS } from './utils/gameData';
 import type { StationData } from './utils/gameData';
 import type { CellState } from './components/LogicalPuzzle';
 
@@ -21,6 +21,7 @@ interface GameState {
   currentStation: StationData;
   clueIndex: number;
   collectedClues: string[];
+  levelIndex: number;
   puzzleGrid: Record<string, CellState>;
   phase: GamePhase;
   travelInfo: TravelInfo | null;
@@ -35,6 +36,7 @@ const defaultState: GameState = {
   currentStation: START_STATION,
   clueIndex: 0,
   collectedClues: [],
+  levelIndex: 0,
   puzzleGrid: {},
   phase: 'MAP',
   travelInfo: null,
@@ -127,7 +129,20 @@ export function useGameState() {
   };
 
   const completePuzzle = () => {
-    setState(s => ({ ...s, phase: 'COMPLETED' }));
+    setState(s => {
+      if (s.levelIndex < GAME_LEVELS.length - 1) {
+        return {
+          ...s,
+          levelIndex: s.levelIndex + 1,
+          clueIndex: 0,
+          collectedClues: [],
+          puzzleGrid: {},
+          phase: 'MAP'
+        };
+      } else {
+        return { ...s, phase: 'COMPLETED' };
+      }
+    });
   };
 
   const resetGame = () => {

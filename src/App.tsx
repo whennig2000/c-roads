@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useGameState } from './store';
-import { MASTER_PUZZLE, CLUE_STATIONS, STATIONS } from './utils/gameData';
+import { GAME_LEVELS, STATIONS } from './utils/gameData';
 import { Login } from './components/Login';
 import { MapView } from './components/MapView';
 import { TravelView } from './components/TravelView';
@@ -29,7 +29,8 @@ function App() {
     return <Login onLogin={login} />;
   }
 
-  const currentClueStation = CLUE_STATIONS[state.clueIndex];
+  const currentLevel = GAME_LEVELS[state.levelIndex];
+  const currentClueStation = currentLevel?.clueStations[state.clueIndex];
   const targetStation = currentClueStation ? Object.values(STATIONS).find(s => s.id === currentClueStation.stationId) : null;
 
   return (
@@ -169,16 +170,20 @@ function App() {
             <p style={{ color: 'var(--text-muted)', marginBottom: '2rem' }}>
               Du kannst jederzeit in diese Akte schauen und dir Notizen machen.
             </p>
-            <LogicalPuzzle 
-              data={MASTER_PUZZLE}
-              collectedClues={state.collectedClues}
-              gridState={state.puzzleGrid}
-              onGridChange={updatePuzzleGrid}
-              onSolve={() => {
-                setShowPuzzleModal(false);
-                completePuzzle();
-              }}
-            />
+            {currentLevel ? (
+              <LogicalPuzzle 
+                data={currentLevel.logical}
+                collectedClues={state.collectedClues}
+                gridState={state.puzzleGrid}
+                onGridChange={updatePuzzleGrid}
+                onSolve={() => {
+                  setShowPuzzleModal(false);
+                  completePuzzle();
+                }}
+              />
+            ) : (
+              <p>Alle Rätsel wurden erfolgreich gelöst!</p>
+            )}
           </div>
         </div>
       )}
