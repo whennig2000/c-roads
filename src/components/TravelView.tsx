@@ -40,12 +40,10 @@ interface TravelViewProps {
   onCancel: () => void;
 }
 
-const getCityImageName = (stationName: string) => {
-  if (stationName.includes("Hamburg")) return "hamburg.jpg";
-  if (stationName.includes("Berlin")) return "berlin.jpg";
-  if (stationName.includes("Leipzig")) return "leipzig.jpg";
-  if (stationName.includes("München")) return "muenchen.jpg";
-  return "station.jpg"; // Fallback for stations
+const getCityImageName = () => {
+  // The user explicitly requested to ALWAYS use a generic station image
+  // so that the window doesn't show a "wrong" station that breaks immersion.
+  return "station.jpg";
 };
 
 export function TravelView({ info, currentStation, onArrive, onArriveAt, onCancel }: TravelViewProps) {
@@ -102,8 +100,8 @@ export function TravelView({ info, currentStation, onArrive, onArriveAt, onCance
 
   // Das Bild für das "Fenster" (beim Warten die aktuelle Stadt, während der Fahrt Landschaft, beim Halt die Halt-Stadt)
   const windowImageSrc = import.meta.env.BASE_URL + "images/" + (
-    isWaiting ? getCityImageName(currentStation.name) : 
-    currentStop ? getCityImageName(currentStop.station.name) : 
+    isWaiting ? getCityImageName() : 
+    currentStop ? getCityImageName() : 
     "landscape.jpg"
   );
 

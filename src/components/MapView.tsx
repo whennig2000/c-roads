@@ -29,13 +29,7 @@ export function MapView({ currentStation, knownStations, onBoardTrain }: MapView
   const geoJsonData = useGermanyGeoJSON();
   
   return (
-    <div className="container animate-fade-in" style={{ position: 'relative', zIndex: 1, minHeight: '100vh', paddingBottom: '4rem' }}>
-      <div style={{
-        position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: -1,
-        backgroundImage: 'url(./images/station.jpg)', backgroundSize: 'cover', backgroundPosition: 'center',
-        filter: 'brightness(0.5)'
-      }} />
-      <div style={{ padding: '2rem', background: 'rgba(255,255,255,0.85)', borderRadius: '20px', backdropFilter: 'blur(10px)', marginTop: '2rem' }}>
+    <div className="container animate-fade-in">
       <div style={{ marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
         <MapPin size={32} color="var(--accent)" />
         <div>
@@ -80,7 +74,6 @@ export function MapView({ currentStation, knownStations, onBoardTrain }: MapView
             knownStations={knownStations}
             onBoardTrain={onBoardTrain} 
           />
-        </div>
         </div>
       </div>
     </div>
