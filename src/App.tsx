@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useGameState } from './store';
 import { GAME_LEVELS, STATIONS } from './utils/gameData';
+import type { StationData } from './utils/gameData';
 import { Login } from './components/Login';
 import { MapView } from './components/MapView';
 import { TravelView } from './components/TravelView';
@@ -123,10 +124,20 @@ function App() {
               <Award color="var(--accent)" /> Deine besuchten Bahnhöfe
             </h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              {Object.values(state.knownStations || STATIONS).map(station => {
-                const visited = state.visitedStations?.includes(station.id);
+              {Object.values(
+                Object.values(state.knownStations || STATIONS).reduce((acc, station) => {
+                  if (!acc[station.name]) {
+                    acc[station.name] = { ...station, visited: false };
+                  }
+                  if (state.visitedStations?.includes(station.id)) {
+                    acc[station.name].visited = true;
+                  }
+                  return acc;
+                }, {} as Record<string, StationData & {visited: boolean}>)
+              ).map(station => {
+                const visited = station.visited;
                 return (
-                  <div key={station.id} style={{ 
+                  <div key={station.name} style={{ 
                     display: 'flex', alignItems: 'center', gap: '1rem', 
                     padding: '1rem', borderRadius: '12px',
                     background: visited ? 'rgba(0, 184, 148, 0.1)' : 'rgba(0,0,0,0.03)',
