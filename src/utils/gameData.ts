@@ -59,7 +59,7 @@ export const STATIONS = {
 export const GAME_LEVELS: LevelData[] = [
   {
     logical: {
-      title: "Das Geburtstags-Geschenk Rätsel",
+      title: "Rätsel 1: Die Geschenke-Planung",
       categories: [
         { category: "Familienmitglied", items: ["Opa", "Onkel", "Cousin", "Tante"] },
         { category: "Geschenk", items: ["Uhr", "Buch", "Wein", "Pralinen"] }
