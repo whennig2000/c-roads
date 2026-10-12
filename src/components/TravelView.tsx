@@ -147,7 +147,7 @@ export function TravelView({ info, currentStation, gummyScore, onArrive, onArriv
       <div className="flex-center">
         <div className="glass-panel animate-fade-in" style={{ padding: '3rem', maxWidth: '600px', width: '100%', textAlign: 'center' }}>
           
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem' }}>
+          <div className="flex-col-mobile" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem' }}>
             <div style={{ textAlign: 'left' }}>
               <h2 style={{ fontSize: '2rem', marginBottom: '0.5rem', color: 'var(--accent)' }}>
                 {isWaiting ? 'Warten am Gleis...' : 'Du bist im Zug!'}
@@ -265,7 +265,7 @@ export function TravelView({ info, currentStation, gummyScore, onArrive, onArriv
           {/* GUMMY MATCH & TELEPORTER */}
           {!isWaiting && (
             <div style={{ marginTop: '3rem', borderTop: '1px solid var(--glass-border)', paddingTop: '2rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <div className="flex-col-mobile" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                 <h3 style={{ margin: 0, color: 'var(--text-main)' }}>Com-Bahn-i Punkte: {gummyScore || 0}</h3>
                 {(gummyScore || 0) >= 5000 && (
                   <button 
@@ -299,7 +299,7 @@ export function TravelView({ info, currentStation, gummyScore, onArrive, onArriv
                     <option key={s.id} value={s.id}>{s.name}</option>
                   ))}
                 </select>
-                <div style={{ display: 'flex', gap: '1rem' }}>
+                <div className="flex-col-mobile" style={{ display: 'flex', gap: '1rem', width: '100%' }}>
                   <button 
                     className="btn" 
                     style={{ flex: 1, background: 'var(--text-muted)' }} 

@@ -37,7 +37,7 @@ function App() {
 
   return (
     <div style={{ position: 'relative', minHeight: '100vh' }}>
-      <header style={{ 
+      <header className="app-header" style={{ 
         position: 'absolute', 
         top: 0, 
         left: 0, 
@@ -51,8 +51,8 @@ function App() {
         <h1 className="text-gradient" style={{ fontSize: '1.5rem', margin: 0 }}>
           🚂 Reise durch Deutschland
         </h1>
-        <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
-          <div style={{ display: 'flex', gap: '1rem' }}>
+        <div className="app-header-buttons" style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
+          <div className="app-header-buttons" style={{ display: 'flex', gap: '1rem' }}>
             {state.phase !== 'PUZZLE' && (
               <button 
                 onClick={() => {

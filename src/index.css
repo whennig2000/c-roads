@@ -193,3 +193,48 @@ h1, h2, h3 {
   text-align: center;
   color: var(--text-muted);
 }
+
+/* Responsive Utilities */
+@media (max-width: 768px) {
+  .flex-col-mobile {
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+    gap: 1rem !important;
+  }
+  
+  .glass-panel {
+    padding: 1.5rem !important;
+  }
+
+  .container {
+    padding: 1rem !important;
+  }
+
+  .app-header {
+    flex-direction: column !important;
+    padding: 1rem !important;
+    position: relative !important;
+    gap: 1rem !important;
+  }
+
+  .app-header-buttons {
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+  }
+
+  main {
+    padding-top: 1rem !important;
+  }
+
+  .btn {
+    padding: 10px 16px !important;
+    font-size: 0.9rem !important;
+    width: 100%;
+  }
+
+  .logical-grid-wrapper {
+    overflow-x: auto;
+    width: 100%;
+  }
+}
