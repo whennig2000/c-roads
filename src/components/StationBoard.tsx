@@ -29,6 +29,7 @@ interface StationBoardProps {
 export function StationBoard({ currentStation, onBoardTrain }: StationBoardProps) {
   const [journeys, setJourneys] = useState<Journey[]>([]);
   const [loading, setLoading] = useState(true);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   useEffect(() => {
     // Generate departures for the current station
@@ -66,51 +67,111 @@ export function StationBoard({ currentStation, onBoardTrain }: StationBoardProps
             const arr = new Date(lastLeg.arrival);
 
             return (
-              <div key={j.id || i} style={{ 
-                background: '#f8f9fa', 
-                border: '1px solid var(--glass-border)',
-                borderRadius: '12px', 
-                padding: '1.5rem',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between'
-              }}>
-                <div>
-                  <div style={{ fontSize: '1.2rem', fontWeight: 600, color: 'var(--accent)', marginBottom: '0.5rem' }}>
-                    {trainName} nach {lastLeg.destination.name}
+              <div key={j.id || i} style={{ display: 'flex', flexDirection: 'column' }}>
+                <div style={{ 
+                  background: '#f8f9fa', 
+                  border: '1px solid var(--glass-border)',
+                  borderRadius: expandedId === j.id ? '12px 12px 0 0' : '12px', 
+                  padding: '1.5rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  position: 'relative',
+                  zIndex: 2
+                }}>
+                  <div>
+                    <div style={{ fontSize: '1.2rem', fontWeight: 600, color: 'var(--accent)', marginBottom: '0.5rem' }}>
+                      {trainName} nach {lastLeg.destination.name}
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', color: 'var(--text-muted)' }}>
+                      <span>Abfahrt: <strong style={{ color: 'var(--text-main)' }}>{dep.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}</strong></span>
+                      <ArrowRight size={16} />
+                      <span>Ankunft: <strong style={{ color: 'var(--text-main)' }}>{arr.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}</strong></span>
+                    </div>
+                    <button 
+                      onClick={() => setExpandedId(expandedId === j.id ? null : j.id)}
+                      style={{ 
+                        background: 'none', border: 'none', padding: 0, marginTop: '0.5rem',
+                        color: 'var(--accent)', cursor: 'pointer', fontSize: '0.9rem', textDecoration: 'underline'
+                      }}
+                    >
+                      {expandedId === j.id ? 'Fahrplan ausblenden' : 'Fahrplan ansehen'}
+                    </button>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', color: 'var(--text-muted)' }}>
-                    <span>Abfahrt: <strong style={{ color: 'var(--text-main)' }}>{dep.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}</strong></span>
-                    <ArrowRight size={16} />
-                    <span>Ankunft: <strong style={{ color: 'var(--text-main)' }}>{arr.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}</strong></span>
-                  </div>
+                  
+                  <button 
+                    className="btn"
+                    onClick={() => {
+                      const parsedStopovers = firstLeg.stopovers?.map(s => ({
+                        station: { 
+                          id: s.stop.id, 
+                          name: s.stop.name, 
+                          coords: s.stop.location ? [s.stop.location.latitude, s.stop.location.longitude] as [number, number] : [0,0] as [number, number] 
+                        },
+                        arrival: s.arrival
+                      })).filter(s => s.arrival) || [];
+
+                        const targetStationData = Object.values(STATIONS).find(s => s.name === lastLeg.destination.name) || { id: "unknown", name: lastLeg.destination.name, coords: [0,0] as [number, number] };
+                        
+                        onBoardTrain({
+                          trainName: trainName,
+                          departureTime: firstLeg.departure,
+                          arrivalTime: lastLeg.arrival,
+                          targetStation: targetStationData,
+                          stopovers: parsedStopovers
+                        });
+                    }}
+                  >
+                    Einsteigen
+                  </button>
                 </div>
                 
-                <button 
-                  className="btn"
-                  onClick={() => {
-                    const parsedStopovers = firstLeg.stopovers?.map(s => ({
-                      station: { 
-                        id: s.stop.id, 
-                        name: s.stop.name, 
-                        coords: s.stop.location ? [s.stop.location.latitude, s.stop.location.longitude] as [number, number] : [0,0] as [number, number] 
-                      },
-                      arrival: s.arrival
-                    })).filter(s => s.arrival) || [];
-
-                      const targetStationData = Object.values(STATIONS).find(s => s.name === lastLeg.destination.name) || { id: "unknown", name: lastLeg.destination.name, coords: [0,0] as [number, number] };
+                {expandedId === j.id && (
+                  <div style={{ 
+                    padding: '1.5rem', 
+                    background: '#fff', 
+                    border: '1px solid var(--glass-border)', 
+                    borderTop: 'none',
+                    borderBottomLeftRadius: '12px',
+                    borderBottomRightRadius: '12px',
+                    boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)'
+                  }}>
+                    <h4 style={{ marginBottom: '1rem', color: 'var(--text-main)' }}>Reiseverlauf</h4>
+                    <ul style={{ listStyleType: 'none', padding: 0, margin: 0, position: 'relative' }}>
+                      <div style={{ position: 'absolute', left: '7px', top: '10px', bottom: '10px', width: '2px', background: 'var(--glass-border)' }}></div>
                       
-                      onBoardTrain({
-                        trainName: trainName,
-                        departureTime: firstLeg.departure,
-                        arrivalTime: lastLeg.arrival,
-                        targetStation: targetStationData,
-                        stopovers: parsedStopovers
-                      });
-                  }}
-                >
-                  Einsteigen
-                </button>
+                      <li style={{ display: 'flex', gap: '1rem', marginBottom: '1rem', position: 'relative', zIndex: 1 }}>
+                        <div style={{ width: '16px', height: '16px', borderRadius: '50%', background: '#fff', border: '3px solid var(--accent)' }}></div>
+                        <div style={{ marginTop: '-2px' }}>
+                          <div style={{ fontWeight: 600 }}>{currentStation.name}</div>
+                          <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>Abfahrt: {dep.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}</div>
+                        </div>
+                      </li>
+                      
+                      {firstLeg.stopovers?.map((stop, sIdx) => {
+                        if (stop.stop.name === currentStation.name || stop.stop.name === lastLeg.destination.name) return null;
+                        const stopTime = new Date(stop.arrival);
+                        return (
+                          <li key={sIdx} style={{ display: 'flex', gap: '1rem', marginBottom: '1rem', position: 'relative', zIndex: 1 }}>
+                            <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#fff', border: '2px solid var(--text-muted)', margin: '2px 2px' }}></div>
+                            <div style={{ marginTop: '-2px' }}>
+                              <div>{stop.stop.name}</div>
+                              <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>{stopTime.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}</div>
+                            </div>
+                          </li>
+                        );
+                      })}
+                      
+                      <li style={{ display: 'flex', gap: '1rem', position: 'relative', zIndex: 1 }}>
+                        <div style={{ width: '16px', height: '16px', borderRadius: '50%', background: '#fff', border: '3px solid var(--accent)' }}></div>
+                        <div style={{ marginTop: '-2px' }}>
+                          <div style={{ fontWeight: 600 }}>{lastLeg.destination.name}</div>
+                          <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>Ankunft: {arr.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}</div>
+                        </div>
+                      </li>
+                    </ul>
+                  </div>
+                )}
               </div>
             );
           })}

@@ -153,7 +153,7 @@ export function generateLocalFallbackJourneys(fromId: string, toId: string, dela
   }
 
   return [{
-    id: `local-ice-${Date.now()}`,
+    id: `local-ice-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
     legs: [{
       line: { name: bestIce },
       origin: { name: path[0].name },
