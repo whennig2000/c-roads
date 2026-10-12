@@ -5,7 +5,7 @@ import { Login } from './components/Login';
 import { MapView } from './components/MapView';
 import { TravelView } from './components/TravelView';
 import { LogicalPuzzle } from './components/LogicalPuzzle';
-import { LogOut, Trophy, Award, X, RotateCcw, Map } from 'lucide-react';
+import { LogOut, Trophy, Award, X, RotateCcw, Map, BookOpen } from 'lucide-react';
 
 function App() {
   const { 
@@ -22,6 +22,7 @@ function App() {
   } = useGameState();
   
   const [showBadges, setShowBadges] = useState(false);
+  const [showPuzzleModal, setShowPuzzleModal] = useState(false);
 
   if (!state.isLoggedIn) {
     return <Login onLogin={login} />;
@@ -54,7 +55,7 @@ function App() {
                   if (state.phase === 'COMPLETED') {
                     alert('Du hast alle Hinweise gefunden! 🎉');
                   } else {
-                    alert(`Nächster Hinweis: ${GAME_LEVELS[state.levelIndex]?.nextHint || 'Keine weiteren Hinweise.'}`);
+                    alert(`Dein aktuelles Reiseziel lautet: Finde den Weg nach ${GAME_LEVELS[state.levelIndex]?.targetStation.name || 'unbekannt'}!`);
                   }
                 }}
                 style={{ 
@@ -65,6 +66,13 @@ function App() {
                 <Map size={20} /> Hinweis
               </button>
             )}
+            
+            <button onClick={() => setShowPuzzleModal(true)} style={{ 
+              background: 'transparent', border: 'none', color: 'var(--accent)', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600
+            }}>
+              <BookOpen size={20} /> Rätselakte
+            </button>
             
             <button onClick={() => setShowBadges(true)} style={{ 
               background: 'transparent', border: 'none', color: 'var(--accent)', cursor: 'pointer',
@@ -139,6 +147,37 @@ function App() {
         </div>
       )}
 
+      {/* PUZZLE MODAL */}
+      {showPuzzleModal && state.phase !== 'COMPLETED' && currentLevel && (
+        <div className="flex-center animate-fade-in" style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, 
+          background: 'rgba(0,0,0,0.5)', zIndex: 100, padding: '2rem'
+        }}>
+          <div className="glass-panel" style={{ padding: '3rem', maxWidth: '800px', width: '100%', position: 'relative', background: '#fff', maxHeight: '90vh', overflowY: 'auto' }}>
+            <button 
+              onClick={() => setShowPuzzleModal(false)}
+              style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: 'none', border: 'none', cursor: 'pointer', zIndex: 10 }}
+            >
+              <X size={24} color="var(--text-muted)" />
+            </button>
+            <h2 style={{ fontSize: '2rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <BookOpen color="var(--accent)" /> Aktuelle Rätselakte
+            </h2>
+            <p style={{ color: 'var(--text-muted)', marginBottom: '2rem' }}>
+              Du kannst jederzeit in diese Akte schauen und dir Notizen machen.
+            </p>
+            <LogicalPuzzle 
+              data={currentLevel.logical}
+              onSolve={() => {
+                setShowPuzzleModal(false);
+                const nextLevel = GAME_LEVELS[state.levelIndex + 1];
+                completePuzzle(nextLevel ? nextLevel.targetStation.id : null);
+              }}
+            />
+          </div>
+        </div>
+      )}
+
       <main style={{ paddingTop: '80px' }}>
         {state.phase === 'COMPLETED' && (
           <div className="flex-center" style={{ minHeight: '80vh' }}>
@@ -207,6 +246,18 @@ function App() {
           />
         )}
       </main>
+
+      <footer style={{ 
+        padding: '2rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.9rem',
+        borderTop: '1px solid var(--glass-border)', marginTop: 'auto', background: 'rgba(255,255,255,0.5)'
+      }}>
+        <p style={{ marginBottom: '0.5rem' }}>
+          Zugdaten bereitgestellt von der <a href="https://v6.db.transport.rest/" target="_blank" rel="noreferrer" style={{color: 'var(--accent)', textDecoration: 'none', fontWeight: 600}}>DB Rest API v6</a>
+        </p>
+        <p>
+          Quellcode auf <a href="https://github.com/whennig2000/c-roads" target="_blank" rel="noreferrer" style={{color: 'var(--accent)', textDecoration: 'none', fontWeight: 600}}>GitHub</a> | Powered by <strong>Antigravity</strong>
+        </p>
+      </footer>
     </div>
   );
 }
