@@ -77,17 +77,19 @@ export function LogicalPuzzle({ data, collectedClues, gridState, onGridChange, o
           
           <div style={{ background: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '12px' }}>
             <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
-              Klicke auf die Felder, um sie zu markieren. (1x = X, 2x = O)
+              Klicke auf die Felder, um sie zu markieren. (1x = X, 2x = O)<br/>
+              <span style={{ fontSize: '0.8rem', color: 'var(--accent)' }}>Hinweis: Wische auf dem Raster nach links/rechts um zu scrollen.</span>
             </p>
             <div className="logical-grid-wrapper">
               <div style={{ 
                 display: 'grid', 
+                minWidth: 'max-content',
                 gridTemplateColumns: `auto ${'1fr '.repeat(cat2.items.length)}`,
-              gap: '2px',
-              background: 'var(--glass-border)',
-              padding: '2px',
-              borderRadius: '8px'
-            }}>
+                gap: '2px',
+                background: 'var(--glass-border)',
+                padding: '2px',
+                borderRadius: '8px'
+              }}>
               {/* Top Header Row */}
               <div className="logical-header" style={{ background: 'transparent' }}></div>
               {cat2.items.map(i2 => (

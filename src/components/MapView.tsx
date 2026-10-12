@@ -38,7 +38,7 @@ export function MapView({ currentStation, knownStations, onBoardTrain }: MapView
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+      <div className="responsive-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
         {/* MAP */}
         <div style={{ height: '500px', width: '100%', borderRadius: '20px', overflow: 'hidden', border: '1px solid var(--glass-border)', background: '#f8f9fa' }}>
           <MapContainer 
